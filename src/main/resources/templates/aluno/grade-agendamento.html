@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Reservar Aula Particular</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 <body class="bg-light container py-4">
 
@@ -14,9 +15,9 @@
                 <small>Escolha um horário disponível (verde) para solicitar sua aula</small>
             </div>
             <div class="d-flex gap-2">
-                <a th:href="@{/aluno/agendar-aula(professorId=${professor.id}, dataBase=${semanaAnterior})}" class="btn btn-outline-light btn-sm">&lt; Anterior</a>
-                <a th:href="@{/aluno/agendar-aula(professorId=${professor.id}, dataBase=${proximaSemana})}" class="btn btn-outline-light btn-sm">Próxima &gt;</a>
-                <a href="/aluno/perfil" class="btn btn-light btn-sm">Cancelar</a>
+                <a th:href="@{/aluno/agendar-aula/professor/{id}(id=${professor.id}, dataBase=${semanaAnterior})}" class="btn btn-outline-light btn-sm">&lt; Anterior</a>
+                <a th:href="@{/aluno/agendar-aula/professor/{id}(id=${professor.id}, dataBase=${proximaSemana})}" class="btn btn-outline-light btn-sm">Próxima &gt;</a>
+                <a href="/aluno/agendar-aula" class="btn btn-light btn-sm">Trocar Professor</a>
             </div>
         </div>
     </div>
@@ -27,7 +28,7 @@
                 <tr>
                     <th>Hora</th>
                     <th th:each="dia : ${dias}">
-                        <span class="d-block fw-bold" th:text="${#temporals.format(dia, 'EEEE')}"></span>
+                        <span class="d-block fw-bold" th:text="${#temporals.format(dia, 'EEE')}"></span>
                         <small class="text-muted" th:text="${#temporals.format(dia, 'dd/MM')}"></small>
                     </th>
                 </tr>
@@ -37,16 +38,22 @@
                     <td class="fw-bold bg-light" th:text="${h + ':00'}"></td>
                     <td th:each="dia : ${dias}" style="min-width: 100px; height: 60px;">
                         
-                        <th:block th:with="item=${disponibilidades.?[data == __${dia}__ && hora == __${h}__]}">
+                        <th:block th:with="vaga=${disponibilidades.?[data.toString() == '__${dia.toString()}__' && hora == __${h}__]}">
                             
-                            <form th:if="${not #lists.isEmpty(item)}" th:action="@{/aluno/agendar/confirmar}" method="post">
-                                <input type="hidden" name="disponibilidadeId" th:value="${item[0].id}">
-                                <button type="submit" class="btn btn-success btn-sm w-100 py-2">
-                                    <i class="bi bi-calendar-plus"></i> Reservar
-                                </button>
-                            </form>
+                            <div th:if="${not #lists.isEmpty(vaga) && !vaga[0].reservado}">
+                                <form th:action="@{/aluno/agendar-aula/confirmar}" method="post">
+                                    <input type="hidden" name="disponibilidadeId" th:value="${vaga[0].id}">
+                                    <button type="submit" class="btn btn-success btn-sm w-100 py-2">
+                                        <i class="bi bi-calendar-plus"></i> Reservar
+                                    </button>
+                                </form>
+                            </div>
 
-                            <span th:if="${#lists.isEmpty(item)}" class="text-muted small">-</span>
+                            <div th:if="${not #lists.isEmpty(vaga) && vaga[0].reservado}">
+                                <span class="badge bg-secondary w-100 py-2">Ocupado</span>
+                            </div>
+
+                            <span th:if="${#lists.isEmpty(vaga)}" class="text-muted small">-</span>
 
                         </th:block>
                     </td>
@@ -55,5 +62,6 @@
         </table>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

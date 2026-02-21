@@ -1,10 +1,7 @@
 package com.academia.controller;
 
-import com.academia.model.Aluno;
 import com.academia.model.Usuario;
-import com.academia.repository.AlunoRepository;
 import com.academia.repository.UsuarioRepository;
-import com.academia.repository.ProfessorRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
@@ -23,19 +20,13 @@ import java.util.UUID;
 public class LoginController {
 
     private final UsuarioRepository usuarioRepository;
-    private final AlunoRepository alunoRepository;
-    private final ProfessorRepository professorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
 
     public LoginController(UsuarioRepository usuarioRepository, 
-                           AlunoRepository alunoRepository, 
-                           ProfessorRepository professorRepository,
                            PasswordEncoder passwordEncoder,
                            JavaMailSender mailSender) {
         this.usuarioRepository = usuarioRepository;
-        this.alunoRepository = alunoRepository;
-        this.professorRepository = professorRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
     }
@@ -59,7 +50,8 @@ public class LoginController {
 
     @GetMapping("/painel-mestre-bjj")
     public String adminDashboard(Authentication auth, Model model) {
-        Usuario admin = usuarioRepository.findByEmail(auth.getName()).orElseThrow();
+        Usuario admin = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         model.addAttribute("trocarSenha", !admin.isSenhaAlteradaPeloAdmin());
         return "admin/dashboard";
     }
@@ -118,16 +110,5 @@ public class LoginController {
         }
         ra.addFlashAttribute("success", "Se o e-mail existir em nossa base, as instruções foram enviadas.");
         return "redirect:/login";
-    }
-
-    @GetMapping("/aluno/perfil")
-    public String perfilAluno(Authentication auth, Model model) {
-        String email = auth.getName();
-        Aluno aluno = alunoRepository.findAll().stream()
-            .filter(a -> a.getUsuario().getEmail().equals(email))
-            .findFirst().orElseThrow();
-        
-        model.addAttribute("aluno", aluno);
-        return "aluno/perfil";
     }
 }

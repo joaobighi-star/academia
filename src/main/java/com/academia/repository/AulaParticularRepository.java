@@ -1,19 +1,18 @@
 package com.academia.repository;
 
-import com.academia.model.AulaParticular;
+import com.academia.model.Aluno;
 import com.academia.model.Professor;
+import com.academia.model.AulaParticular;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.time.LocalDateTime;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
+@Repository
 public interface AulaParticularRepository extends JpaRepository<AulaParticular, Long> {
-    
-    List<AulaParticular> findByProfessor(Professor professor);
 
-    // Busca as aulas de um professor em um intervalo de tempo (para a grade semanal)
-    List<AulaParticular> findByProfessorAndDataHoraBetween(
-        Professor professor, 
-        LocalDateTime inicio, 
-        LocalDateTime fim
-    );
+    // Busca para o Aluno
+    List<AulaParticular> findByAlunoOrderByDataHoraAsc(Aluno aluno);
+    
+    // Busca para o Professor (Necessário para o ProfessorController)
+    List<AulaParticular> findByProfessorOrderByDataHoraAsc(Professor professor);
 }

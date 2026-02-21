@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Controller
@@ -36,73 +37,21 @@ public class ProfessorController {
         this.disponibilidadeRepository = disponibilidadeRepository;
     }
 
-    // --- PAINEL PRINCIPAL ---
     @GetMapping("/painel")
     public String painelProfessor(Authentication auth, Model model) {
         Professor prof = buscarProfessorLogado(auth);
         model.addAttribute("professor", prof);
         
-        // Filtra turmas onde este professor é o responsável
         List<Turma> turmas = turmaRepository.findAll().stream()
-            .filter(t -> t.getProfessorResponsavel().getId().equals(prof.getId()))
+            .filter(t -> t.getProfessorResponsavel() != null && t.getProfessorResponsavel().getId().equals(prof.getId()))
             .toList();
             
         model.addAttribute("turmas", turmas);
-        model.addAttribute("solicitacoes", aulaParticularRepository.findByProfessor(prof));
+        model.addAttribute("solicitacoes", aulaParticularRepository.findByProfessorOrderByDataHoraAsc(prof));
         
         return "professor/painel";
     }
 
-    // --- CHAMADA COLETIVA (Resolve o Erro 404) ---
-    @GetMapping("/chamada/{turmaId}")
-    public String telaChamada(@PathVariable Long turmaId, Model model) {
-        Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada"));
-        
-        model.addAttribute("turma", turma);
-        model.addAttribute("alunos", turma.getAlunos());
-        return "professor/chamada";
-    }
-
-    @PostMapping("/chamada/salvar")
-    public String salvarPresenca(@RequestParam(value = "alunosPresentes", required = false) List<Long> idsPresentes) {
-        if (idsPresentes != null) {
-            for (Long id : idsPresentes) {
-                Aluno aluno = alunoRepository.findById(id).orElseThrow();
-                aluno.setAulasAssistidas(aluno.getAulasAssistidas() + 1);
-                alunoRepository.save(aluno);
-            }
-        }
-        return "redirect:/professor/painel?sucessoChamada=true";
-    }
-
-    // --- GESTÃO DE AULAS PARTICULARES ---
-    @PostMapping("/aula-particular/decidir")
-    public String decidirAula(@RequestParam Long aulaId, @RequestParam String decisao) {
-        AulaParticular aula = aulaParticularRepository.findById(aulaId).orElseThrow();
-        
-        if (decisao.equals("aceitar")) {
-            aula.setStatus("CONFIRMADA");
-        } else if (decisao.equals("concluir")) {
-            aula.setStatus("CONCLUIDA");
-            Aluno aluno = aula.getAluno();
-            aluno.setAulasAssistidas(aluno.getAulasAssistidas() + 1);
-            alunoRepository.save(aluno);
-        } else {
-            aula.setStatus("RECUSADA");
-            // Se recusar, liberamos o slot na agenda para outro aluno
-            if (aula.getDisponibilidade() != null) {
-                Disponibilidade disp = aula.getDisponibilidade();
-                disp.setReservado(false);
-                disponibilidadeRepository.save(disp);
-            }
-        }
-        
-        aulaParticularRepository.save(aula);
-        return "redirect:/professor/painel";
-    }
-
-    // --- GRADE DE DISPONIBILIDADE (AGENDA) ---
     @GetMapping("/agenda")
     public String verAgenda(Authentication auth, 
                             @RequestParam(required = false) String dataBase, 
@@ -138,27 +87,61 @@ public class ProfessorController {
         Professor prof = buscarProfessorLogado(auth);
         LocalDate dataClick = LocalDate.parse(data);
 
-        disponibilidadeRepository.findByProfessorAndDataBetween(prof, dataClick, dataClick)
-            .stream()
-            .filter(d -> d.getHora().equals(hora))
-            .findFirst()
-            .ifPresentOrElse(
-                disponibilidadeRepository::delete,
-                () -> {
-                    Disponibilidade nova = new Disponibilidade();
-                    nova.setProfessor(prof);
-                    nova.setData(dataClick);
-                    nova.setHora(hora);
-                    disponibilidadeRepository.save(nova);
-                }
-            );
+        Optional<Disponibilidade> existente = disponibilidadeRepository
+                .findByProfessorAndDataAndHora(prof, dataClick, hora);
+
+        if (existente.isPresent()) {
+            if (!existente.get().isReservado()) {
+                disponibilidadeRepository.delete(existente.get());
+            }
+        } else {
+            Disponibilidade nova = new Disponibilidade();
+            nova.setProfessor(prof);
+            nova.setData(dataClick);
+            nova.setHora(hora);
+            nova.setReservado(false);
+            disponibilidadeRepository.save(nova);
+        }
 
         return "redirect:/professor/agenda?dataBase=" + data;
+    }
+
+    @GetMapping("/chamada/{turmaId}")
+    public String telaChamada(@PathVariable Long turmaId, Model model) {
+        Turma turma = turmaRepository.findById(turmaId).orElseThrow();
+        model.addAttribute("turma", turma);
+        model.addAttribute("alunos", turma.getAlunos());
+        return "professor/chamada";
+    }
+
+    @PostMapping("/aula-particular/decidir")
+    public String decidirAula(@RequestParam Long aulaId, @RequestParam String decisao) {
+        AulaParticular aula = aulaParticularRepository.findById(aulaId).orElseThrow();
+        
+        if (decisao.equals("aceitar")) {
+            aula.setStatus("CONFIRMADA");
+        } else if (decisao.equals("concluir")) {
+            aula.setStatus("CONCLUIDA");
+            Aluno a = aula.getAluno();
+            a.setAulasAssistidas(a.getAulasAssistidas() + 1);
+            alunoRepository.save(a);
+        } else if (decisao.equals("recusar")) {
+            aula.setStatus("RECUSADA");
+            if (aula.getDisponibilidade() != null) {
+                Disponibilidade d = aula.getDisponibilidade();
+                d.setReservado(false);
+                disponibilidadeRepository.save(d);
+            }
+        }
+        
+        aulaParticularRepository.save(aula);
+        return "redirect:/professor/painel";
     }
 
     private Professor buscarProfessorLogado(Authentication auth) {
         return professorRepository.findAll().stream()
             .filter(p -> p.getUsuario().getEmail().equals(auth.getName()))
-            .findFirst().orElseThrow();
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
     }
 }

@@ -35,7 +35,19 @@ public class AlunoController {
         this.disponibilidadeRepository = disponibilidadeRepository;
     }
 
-    // --- MÉTODOS DE IMAGEM (RESOLVE O PROBLEMA DAS FOTOS) ---
+    @GetMapping("/perfil")
+    public String exibirPerfil(Model model, Authentication auth) {
+        Aluno aluno = buscarAlunoLogado(auth);
+        
+        // Busca as aulas agendadas para exibir no perfil
+        List<AulaParticular> minhasAulas = aulaParticularRepository.findByAlunoOrderByDataHoraAsc(aluno);
+        
+        model.addAttribute("aluno", aluno);
+        model.addAttribute("aulas", minhasAulas);
+        
+        return "aluno/perfil";
+    }
+
     @GetMapping("/foto/{id}")
     @ResponseBody
     public ResponseEntity<byte[]> exibirFoto(@PathVariable Long id) {
@@ -43,19 +55,17 @@ public class AlunoController {
                 .map(aluno -> {
                     if (aluno.getFoto() == null) return ResponseEntity.notFound().<byte[]>build();
                     return ResponseEntity.ok()
-                            .contentType(MediaType.IMAGE_JPEG) // Ajuste para o tipo que você salva (PNG/JPEG)
+                            .contentType(MediaType.IMAGE_JPEG)
                             .body(aluno.getFoto());
                 }).orElse(ResponseEntity.notFound().build());
     }
 
-    // --- LISTAGEM DE PROFESSORES ---
     @GetMapping("/agendar-aula")
     public String selecionarProfessor(Model model) {
         model.addAttribute("professores", professorRepository.findAll());
         return "aluno/selecionar-professor";
     }
 
-    // --- GRADE DO PROFESSOR ---
     @GetMapping("/agendar-aula/professor/{id}")
     public String verGradeProfessor(@PathVariable("id") Long professorId,
                                     @RequestParam(required = false) String dataBase, 
@@ -84,7 +94,6 @@ public class AlunoController {
         return "aluno/grade-agendamento";
     }
 
-    // --- CONFIRMAÇÃO DE AGENDAMENTO ---
     @PostMapping("/agendar-aula/confirmar")
     public String confirmarAgendamento(@RequestParam Long disponibilidadeId, Authentication auth) {
         Aluno aluno = buscarAlunoLogado(auth);

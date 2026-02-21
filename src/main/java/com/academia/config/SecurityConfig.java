@@ -18,20 +18,27 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
+                // Recursos estáticos liberados
                 .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
+                
+                // Rotas públicas
                 .requestMatchers("/recuperar-senha/**", "/login").permitAll()
                 
                 // LIBERAÇÃO DAS FOTOS: Deve vir ANTES da regra restrita do /aluno/**
+                // Permite que Admin e Professores vejam as fotos dos alunos também
                 .requestMatchers("/aluno/foto/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
                 
+                // Restrições por Role
                 .requestMatchers("/painel-mestre-bjj/**").hasRole("ADMIN")
                 .requestMatchers("/professor/**").hasRole("PROFESSOR")
                 .requestMatchers("/aluno/**").hasRole("ALUNO")
+                
+                // Qualquer outra requisição (como /home) exige login
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/home", true)
+                .defaultSuccessUrl("/home", true) // Direciona para o redirectByRole do LoginController
                 .permitAll()
             )
             .exceptionHandling(ex -> ex
@@ -54,7 +61,7 @@ public class SecurityConfig {
 
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
-        // Retornamos 403 (Forbidden) para podermos debugar problemas de permissão mais facilmente
+        // Retornamos 403 (Forbidden) para facilitar o debug de acesso negado
         return (request, response, accessDeniedException) -> {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
         };

@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .grid-cell { min-width: 120px; transition: all 0.2s; }
-        .btn-available { background-color: #d1e7dd; border-color: #badbcc; color: #0f5132; }
-        .btn-available:hover { background-color: #badbcc; }
-        .btn-closed { background-color: #f8f9fa; border-color: #dee2e6; color: #6c757d; }
-        .btn-closed:hover { background-color: #e2e6ea; color: #495057; }
-        .btn-reserved { background-color: #cfe2ff; border-color: #b6d4fe; color: #084298; cursor: not-allowed; }
+        .btn-available { background-color: #d1e7dd !important; border-color: #badbcc !important; color: #0f5132 !important; }
+        .btn-available:hover { background-color: #badbcc !important; transform: scale(1.02); }
+        .btn-closed { background-color: #f8f9fa !important; border-color: #dee2e6 !important; color: #6c757d !important; border-style: dashed !important; }
+        .btn-closed:hover { background-color: #e2e6ea !important; color: #495057 !important; }
+        .btn-reserved { background-color: #cfe2ff !important; border-color: #b6d4fe !important; color: #084298 !important; cursor: not-allowed; opacity: 0.9; }
     </style>
 </head>
 <body class="bg-light container py-4">
@@ -19,17 +19,17 @@
     <div class="card shadow-sm mb-4 border-0">
         <div class="card-body d-flex justify-content-between align-items-center bg-dark text-white rounded">
             <div>
-                <h4 class="mb-0"><i class="bi bi-calendar3"></i> Minha Disponibilidade</h4>
-                <small class="text-secondary">Clique nos horários para abrir ou fechar sua agenda particular</small>
+                <h4 class="mb-0"><i class="bi bi-calendar3"></i> Gestão de Horários</h4>
+                <p class="small mb-0 text-secondary">Gerencie a disponibilidade para os alunos</p>
             </div>
             <div class="d-flex gap-2">
                 <a th:href="@{/professor/agenda(dataBase=${semanaAnterior})}" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-chevron-left"></i> Semana Anterior
+                    <i class="bi bi-chevron-left"></i> Anterior
                 </a>
                 <a th:href="@{/professor/agenda(dataBase=${proximaSemana})}" class="btn btn-outline-light btn-sm">
-                    Próxima Semana <i class="bi bi-chevron-right"></i>
+                    Próxima <i class="bi bi-chevron-right"></i>
                 </a>
-                <a href="/professor/painel" class="btn btn-primary btn-sm ms-3">Voltar ao Painel</a>
+                <a href="/professor/painel" class="btn btn-primary btn-sm ms-2">Painel Principal</a>
             </div>
         </div>
     </div>
@@ -39,39 +39,46 @@
             <thead class="table-light">
                 <tr>
                     <th style="width: 100px;">Hora</th>
-                    <th th:each="dia : ${dias}" class="py-3">
-                        <span class="d-block fw-bold" th:text="${#temporals.format(dia, 'EEEE')}">Segunda</span>
-                        <small class="text-muted" th:text="${#temporals.format(dia, 'dd/MM')}">19/02</small>
+                    <th th:each="dia : ${dias}" class="py-2">
+                        <span class="d-block fw-bold" th:text="${#temporals.format(dia, 'EEE')}"></span>
+                        <small class="text-muted" th:text="${#temporals.format(dia, 'dd/MM')}"></small>
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="h : ${horas}">
-                    <td class="fw-bold bg-light text-secondary" th:text="${h + ':00'}">08:00</td>
+                    <td class="fw-bold bg-light text-muted small" th:text="${h + ':00'}"></td>
                     
                     <td th:each="dia : ${dias}" class="grid-cell p-1">
-                        <div th:with="disp=${null}">
-                            <form th:action="@{/professor/agenda/alternar}" method="post">
-                                <input type="hidden" name="data" th:value="${dia}">
-                                <input type="hidden" name="hora" th:value="${h}">
-                                
-                                <th:block th:with="item=${disponibilidades.?[data == __${dia}__ && hora == __${h}__]}">
+                        
+                        <div th:with="vaga=${disponibilidades.?[data.toString() == '__${dia.toString()}__' && hora == __${h}__]}">
+                            
+                            <div th:if="${not #lists.isEmpty(vaga)}">
+                                <form th:action="@{/professor/agenda/alternar}" method="post">
+                                    <input type="hidden" name="data" th:value="${dia}">
+                                    <input type="hidden" name="hora" th:value="${h}">
                                     
-                                    <button th:if="${not #lists.isEmpty(item)}" 
-                                            type="submit" 
-                                            th:class="${item[0].reservado} ? 'btn btn-sm btn-reserved w-100 py-2' : 'btn btn-sm btn-available w-100 py-2'"
-                                            th:disabled="${item[0].reservado}">
-                                        <i th:if="${item[0].reservado}" class="bi bi-lock-fill"></i>
-                                        <span th:text="${item[0].reservado} ? 'Ocupado' : 'Disponível'"></span>
+                                    <button type="submit" 
+                                            th:class="${vaga[0].reservado} ? 'btn btn-sm btn-reserved w-100 py-2' : 'btn btn-sm btn-available w-100 py-2'"
+                                            th:disabled="${vaga[0].reservado}">
+                                        <i th:if="${vaga[0].reservado}" class="bi bi-person-check-fill"></i>
+                                        <i th:unless="${vaga[0].reservado}" class="bi bi-unlock"></i>
+                                        <span class="d-block small" th:text="${vaga[0].reservado} ? 'Reservado' : 'Aberto'"></span>
                                     </button>
+                                </form>
+                            </div>
 
-                                    <button th:if="${#lists.isEmpty(item)}" 
-                                            type="submit" 
-                                            class="btn btn-sm btn-closed w-100 py-2">
-                                        <i class="bi bi-plus-lg small"></i> Abrir
+                            <div th:if="${#lists.isEmpty(vaga)}">
+                                <form th:action="@{/professor/agenda/alternar}" method="post">
+                                    <input type="hidden" name="data" th:value="${dia}">
+                                    <input type="hidden" name="hora" th:value="${h}">
+                                    <button type="submit" class="btn btn-sm btn-closed w-100 py-2">
+                                        <i class="bi bi-plus-lg d-block"></i>
+                                        <span class="small">Abrir</span>
                                     </button>
-                                </th:block>
-                            </form>
+                                </form>
+                            </div>
+
                         </div>
                     </td>
                 </tr>
@@ -79,11 +86,12 @@
         </table>
     </div>
 
-    <div class="mt-4 d-flex gap-4 justify-content-center">
-        <div class="small"><span class="badge btn-closed border text-dark">&nbsp;&nbsp;</span> Horário Fechado</div>
-        <div class="small"><span class="badge btn-available border text-dark">&nbsp;&nbsp;</span> Disponível para Alunos</div>
-        <div class="small"><span class="badge btn-reserved border text-dark">&nbsp;&nbsp;</span> Aula Reservada</div>
+    <div class="mt-4 d-flex gap-4 justify-content-center text-muted">
+        <small><i class="bi bi-plus-lg"></i> <b>Abrir:</b> Horário vago</small>
+        <small><i class="bi bi-unlock text-success"></i> <b>Aberto:</b> Disponível</small>
+        <small><i class="bi bi-person-check-fill text-primary"></i> <b>Reservado:</b> Com aluno</small>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
