@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes da Turma - BJJ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between">
+            <h4 th:text="'Turma: ' + ${turma.nome}">Turma</h4>
+            <a href="/painel-mestre-bjj/turmas/listar" class="btn btn-sm btn-outline-light">Voltar</a>
+        </div>
+        <div class="card-body">
+            <h5>Lista de Alunos Matriculados</h5>
+            <table class="table table-hover mt-3">
+                <thead class="table-light">
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nome</th>
+                        <th>Faixa</th>
+                        <th>Status Mensalidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${alunos}">
+                        <td>
+                            <img th:src="@{'/painel-mestre-bjj/alunos/foto/' + ${a.id}}" 
+                                 class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                        </td>
+                        <td th:text="${a.nome}">Nome</td>
+                        <td>
+                            <span class="badge bg-secondary" th:text="${a.faixa}">Faixa</span>
+                        </td>
+                        <td>
+                            <span th:class="${a.statusMensalidade.name() == 'EM_DIA' ? 'text-success' : 'text-danger'}" 
+                                  th:text="${a.statusMensalidade}">Status</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div th:if="${#lists.isEmpty(alunos)}" class="alert alert-info">
+                Nenhum aluno matriculado nesta turma ainda.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

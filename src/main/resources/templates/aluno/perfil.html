@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil BJJ | Área do Aluno</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* CONFIGURAÇÃO DO BACKGROUND COM A IMAGEM TERCEIRA */
+        .bg-aluno {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+                        url('/img/terceira.jpg'); /* Certifique-se que o nome e extensão estão corretos */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* A imagem fica fixa enquanto o conteúdo rola */
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        /* CARDS COM EFEITO DE TRANSPARÊNCIA (GLASSMORPHISM) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .bjj-belt-progress {
+            background-color: #222;
+            border: 2px solid #000;
+            height: 40px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .stripe-mark {
+            border-right: 4px solid #fff;
+            height: 100%;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .profile-img {
+            width: 180px; 
+            height: 180px; 
+            object-fit: cover; 
+            border: 5px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-aluno">
+        <div class="container mt-4 mb-5">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4 p-3 glass-card shadow-sm">
+                <h2 class="text-primary fw-bold mb-0"><i class="bi bi-person-badge"></i> Perfil do Guerreiro</h2>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">Sair do Sistema</button>
+                </form>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card glass-card text-center p-4 h-100">
+                        <div class="position-relative d-inline-block mx-auto mb-3">
+                            <img th:src="@{/aluno/foto/{id}(id=${aluno.id})}" 
+                                 class="rounded-circle profile-img"
+                                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';">
+                            <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-light p-2">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </span>
+                        </div>
+                        
+                        <h3 class="fw-bold mb-0 text-dark" th:text="${aluno.nome}">Nome</h3>
+                        <p class="text-muted small" th:text="'Matrícula: ' + ${#temporals.format(aluno.dataMatricula, 'dd/MM/yyyy')}"></p>
+                        
+                        <div class="my-3">
+                            <span class="badge bg-dark fs-6 px-4 py-2 shadow-sm" th:text="'FAIXA ' + ${aluno.faixa}">Faixa</span>
+                        </div>
+
+                        <div class="mt-3 p-3 bg-light rounded text-start">
+                            <p class="small mb-2"><strong><i class="bi bi-whatsapp"></i>:</strong> <span th:text="${aluno.telefone}"></span></p>
+                            <p class="small mb-0" th:if="${aluno.nomeResponsavel}">
+                                <strong><i class="bi bi-shield-check"></i>:</strong> <span th:text="${aluno.nomeResponsavel}"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card glass-card p-4 mb-4">
+                        <h5 class="fw-bold mb-4 text-primary border-bottom pb-2">
+                            <i class="bi bi-bar-chart-fill me-2"></i>Jornada para a Próxima Graduação
+                        </h5>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold">Aulas Assistidas</span>
+                            <span class="badge bg-primary fs-6" th:text="${aluno.aulasAssistidas + ' / ' + aluno.metaAulasNovaFaixa}"></span>
+                        </div>
+                        
+                        <div class="progress bjj-belt-progress shadow-sm mb-4">
+                            <div class="stripe-mark" style="left: 20%;"></div>
+                            <div class="stripe-mark" style="left: 40%;"></div>
+                            <div class="stripe-mark" style="left: 60%;"></div>
+                            <div class="stripe-mark" style="left: 80%;"></div>
+                            
+                            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 th:style="'width: ' + (${aluno.aulasAssistidas} * 100 / ${aluno.metaAulasNovaFaixa}) + '%'">
+                            </div>
+                        </div>
+
+                        <div th:if="${aluno.aulasAssistidas >= aluno.metaAulasNovaFaixa}" class="alert alert-warning border-0 shadow-sm">
+                            <i class="bi bi-stars"></i> <strong>OSS!</strong> Meta de aulas atingida. O mestre está avaliando seu desempenho técnico!
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/aluno/agendar-aula}" class="btn btn-primary btn-lg shadow fw-bold">
+                                <i class="bi bi-calendar-plus me-2"></i> AGENDAR AULA PARTICULAR
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card glass-card p-4">
+                        <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2">
+                            <i class="bi bi-shield-check me-2"></i>Status Administrativo
+                        </h5>
+                        <div class="row text-center g-3">
+                            <div class="col-6">
+                                <div class="p-3 border rounded bg-white shadow-sm">
+                                    <p class="text-muted mb-1 small">MENSALIDADE</p>
+                                    <h5 th:class="${aluno.statusMensalidade.toString() == 'EM_DIA' ? 'text-success fw-bold mb-0' : 'text-danger fw-bold mb-0'}" 
+                                        th:text="${aluno.statusMensalidade}"></h5>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 border rounded bg-white shadow-sm">
+                                    <p class="text-muted mb-1 small">VENCIMENTO</p>
+                                    <h5 class="fw-bold mb-0 text-dark" th:text="${#temporals.format(aluno.dataVencimento, 'dd/MM/yyyy')}"></h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

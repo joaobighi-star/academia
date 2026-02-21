@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel do Professor - BJJ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white shadow-sm rounded">
+        <h2 class="mb-0 text-primary">
+            <i class="bi bi-shield-lock"></i> 
+            <span th:text="'Mestre: ' + ${professor.nome}">Professor</span>
+        </h2>
+        <div class="d-flex gap-2">
+            <a th:href="@{/professor/agenda}" class="btn btn-dark btn-sm px-4 d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2"></i> Minha Agenda
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button class="btn btn-outline-danger btn-sm px-4">Sair</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${param.sucessoChamada}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> Presenças registradas e aulas somadas com sucesso!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-dark text-white fw-bold">
+                    <i class="bi bi-people"></i> Minhas Turmas Coletivas
+                </div>
+                <div class="card-body">
+                    <div th:each="t : ${turmas}" class="border rounded p-3 mb-3 bg-white shadow-xs">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong class="fs-5" th:text="${t.nome}">Nome</strong><br>
+                                <span class="badge bg-secondary" th:text="${t.horario}">Horário</span><br>
+                                <small class="text-muted" th:text="${t.alunos.size() + ' alunos matriculados'}"></small>
+                            </div>
+                            <a th:href="@{/professor/chamada/{id}(id=${t.id})}" class="btn btn-primary">
+                                <i class="bi bi-card-checklist"></i> Lista de Chamada
+                            </a>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(turmas)}" class="text-center text-muted py-4">
+                        Você não possui turmas vinculadas.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <i class="bi bi-envelope-exclamation"></i> Novos Pedidos (Particulares)
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Aluno</th>
+                                <th>Data/Hora</th>
+                                <th class="text-center">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${solicitacoes}" th:if="${s.status == 'PENDENTE'}">
+                                <td class="align-middle fw-bold" th:text="${s.aluno.nome}">Aluno</td>
+                                <td class="align-middle text-muted" th:text="${#temporals.format(s.dataHora, 'dd/MM - HH:mm')}">Data</td>
+                                <td class="text-center">
+                                    <form th:action="@{/professor/aula-particular/decidir}" method="post" class="d-inline">
+                                        <input type="hidden" name="aulaId" th:value="${s.id}">
+                                        <button name="decisao" value="aceitar" class="btn btn-success btn-sm px-3">✓</button>
+                                        <button name="decisao" value="recusar" class="btn btn-danger btn-sm px-3">✗</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white fw-bold">
+                    <i class="bi bi-clock-history"></i> Aulas Confirmadas
+                </div>
+                <div class="card-body">
+                    <div th:each="s : ${solicitacoes}" th:if="${s.status == 'CONFIRMADA'}" class="alert alert-light border d-flex justify-content-between align-items-center py-2 mb-2">
+                        <div>
+                            <span class="fw-bold" th:text="${s.aluno.nome}">Aluno</span><br>
+                            <small class="text-muted" th:text="${#temporals.format(s.dataHora, 'dd/MM - HH:mm')}"></small>
+                        </div>
+                        <form th:action="@{/professor/aula-particular/decidir}" method="post">
+                            <input type="hidden" name="aulaId" th:value="${s.id}">
+                            <button name="decisao" value="concluir" class="btn btn-outline-primary btn-sm">Concluir</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
