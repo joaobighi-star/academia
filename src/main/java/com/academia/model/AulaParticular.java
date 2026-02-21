@@ -12,8 +12,6 @@ public class AulaParticular {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relacionamento com o slot da grade
-    // Quando a aula é marcada, ela ocupa uma disponibilidade específica
     @OneToOne
     @JoinColumn(name = "disponibilidade_id")
     private Disponibilidade disponibilidade;
@@ -26,15 +24,16 @@ public class AulaParticular {
     @JoinColumn(name = "professor_id")
     private Professor professor;
 
-    // Mantemos esse campo para auditoria ou caso a aula mude de horário
     private LocalDateTime dataHora;
 
-    // Status: PENDENTE, CONFIRMADA, CONCLUIDA, RECUSADA
     private String status;
 
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 
-    // Campos auxiliares para facilitar o somatório de progresso que fizemos antes
+    // Novo campo para a mensagem de feedback do professor
+    @Column(columnDefinition = "TEXT")
+    private String mensagemProfessor;
+
     private boolean presencaConfirmada = false;
 }

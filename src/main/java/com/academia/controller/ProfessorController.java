@@ -115,8 +115,13 @@ public class ProfessorController {
     }
 
     @PostMapping("/aula-particular/decidir")
-    public String decidirAula(@RequestParam Long aulaId, @RequestParam String decisao) {
+    public String decidirAula(@RequestParam Long aulaId, 
+                             @RequestParam String decisao,
+                             @RequestParam(required = false) String mensagem) {
         AulaParticular aula = aulaParticularRepository.findById(aulaId).orElseThrow();
+        
+        // Salva a mensagem do professor se houver
+        aula.setMensagemProfessor(mensagem);
         
         if (decisao.equals("aceitar")) {
             aula.setStatus("CONFIRMADA");
