@@ -29,4 +29,69 @@ public class Turma {
 
     @OneToMany(mappedBy = "turma")
     private List<Aluno> alunos;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+	public String getHorario() {
+		return horario;
+	}
+
+	public void setHorario(String horario) {
+		this.horario = horario;
+	}
+
+	public String getFaixaEtaria() {
+		return faixaEtaria;
+	}
+
+	public void setFaixaEtaria(String faixaEtaria) {
+		this.faixaEtaria = faixaEtaria;
+	}
+
+	public String getNivelFaixa() {
+		return nivelFaixa;
+	}
+
+	public void setNivelFaixa(String nivelFaixa) {
+		this.nivelFaixa = nivelFaixa;
+	}
+
+	public Set<DiaSemana> getDiasSemana() {
+		return diasSemana;
+	}
+
+	public void setDiasSemana(Set<DiaSemana> diasSemana) {
+		this.diasSemana = diasSemana;
+	}
+
+	public Professor getProfessorResponsavel() {
+		return professorResponsavel;
+	}
+
+	public void setProfessorResponsavel(Professor professorResponsavel) {
+		this.professorResponsavel = professorResponsavel;
+	}
+
+	public List<Aluno> getAlunos() {
+		return alunos;
+	}
+
+	public void setAlunos(List<Aluno> alunos) {
+		this.alunos = alunos;
+	}
+    
 }

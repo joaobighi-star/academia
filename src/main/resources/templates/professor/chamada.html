@@ -13,11 +13,29 @@
         .faixa-badge-MARROM { background-color: #8B4513; color: #fff; }
         .faixa-badge-PRETA { background-color: #000; color: #fff; }
         
+        /* Estilo da foto na tabela */
         .img-aluno-chamada {
             width: 55px;
             height: 55px;
             object-fit: cover;
             border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .img-aluno-chamada:hover {
+            transform: scale(1.1);
+            border-color: #0d6efd;
+        }
+
+        /* Estilo para o Modal de Foto */
+        .modal-content-foto {
+            background-color: transparent !important;
+            border: none !important;
+        }
+        #nomeAlunoModal {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-weight: bold;
         }
     </style>
 </head>
@@ -52,6 +70,9 @@
                             <td>
                                 <img th:src="@{/aluno/foto/{id}(id=${a.id})}" 
                                      class="rounded-circle img-aluno-chamada shadow-sm"
+                                     th:data-url="@{/aluno/foto/{id}(id=${a.id})}"
+                                     th:data-nome="${a.nome}"
+                                     onclick="abrirZoom(this)"
                                      onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';">
                             </td>
                             <td>
@@ -87,6 +108,34 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalZoom" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-foto">
+                <div class="modal-body text-center p-0 position-relative">
+                    <h5 id="nomeAlunoModal" class="text-white mb-3"></h5>
+                    <img src="" id="imgZoom" class="img-fluid rounded shadow-lg" style="max-height: 80vh; border: 3px solid white;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function abrirZoom(elemento) {
+            // Pega os dados dos atributos data-
+            const url = elemento.getAttribute('data-url');
+            const nome = elemento.getAttribute('data-nome');
+
+            // Aplica ao Modal
+            document.getElementById('imgZoom').src = url;
+            document.getElementById('nomeAlunoModal').innerText = nome;
+            
+            // Abre o modal
+            var meuModal = new bootstrap.Modal(document.getElementById('modalZoom'));
+            meuModal.show();
+        }
+    </script>
 </body>
 </html>
