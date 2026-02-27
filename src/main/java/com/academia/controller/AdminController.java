@@ -2,7 +2,8 @@ package com.academia.controller;
 
 import com.academia.enums.Perfil;
 import com.academia.enums.StatusMensalidade;
-import com.academia.enums.DiaSemana; // Importe o novo Enum
+import com.academia.enums.DiaSemana;
+import com.academia.enums.Faixa; // Importante
 import com.academia.model.Aluno;
 import com.academia.model.Professor;
 import com.academia.model.Turma;
@@ -39,29 +40,62 @@ public class AdminController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // --- CRUD PROFESSORES ---
+
+    @GetMapping("/professores/listar")
+    public String listarProfessores(Model model) {
+        model.addAttribute("professores", professorRepository.findAll());
+        return "admin/lista-professores";
+    }
+
     @GetMapping("/professores/novo")
-    public String formularioProfessor(Professor professor) {
+    public String formularioProfessor(Model model) {
+        model.addAttribute("professor", new Professor());
         return "admin/cadastro-professor";
     }
 
     @PostMapping("/professores/salvar")
-    public String salvarProfessor(Professor professor) {
-        Usuario user = new Usuario();
-        user.setEmail(professor.getUsuario().getEmail());
-        user.setSenha(passwordEncoder.encode("prof123"));
-        user.setPerfis(Set.of(Perfil.ROLE_PROFESSOR));
-        user.setSenhaAlteradaPeloAdmin(false);
-        professor.setUsuario(user);
+    public String salvarProfessor(@ModelAttribute Professor professor) {
+        if (professor.getId() == null) {
+            // Novo Professor: Criar usuário do zero
+            Usuario user = new Usuario();
+            user.setEmail(professor.getUsuario().getEmail());
+            user.setSenha(passwordEncoder.encode("prof123")); // Senha padrão
+            user.setPerfis(Set.of(Perfil.ROLE_PROFESSOR));
+            user.setSenhaAlteradaPeloAdmin(false);
+            professor.setUsuario(user);
+        } else {
+            // Edição: Manter o usuário existente
+            Professor existente = professorRepository.findById(professor.getId()).orElseThrow();
+            professor.getUsuario().setId(existente.getUsuario().getId());
+            professor.getUsuario().setSenha(existente.getUsuario().getSenha());
+            professor.getUsuario().setPerfis(existente.getUsuario().getPerfis());
+        }
+        
         professorRepository.save(professor);
-        return "redirect:/painel-mestre-bjj";
+        return "redirect:/painel-mestre-bjj/professores/listar";
     }
 
-    // ATUALIZADO: Agora envia os dias da semana para o formulário
+    @GetMapping("/professores/editar/{id}")
+    public String editarProfessor(@PathVariable Long id, Model model) {
+        Professor prof = professorRepository.findById(id).orElseThrow();
+        model.addAttribute("professor", prof);
+        return "admin/cadastro-professor";
+    }
+
+    @GetMapping("/professores/excluir/{id}")
+    public String excluirProfessor(@PathVariable Long id) {
+        professorRepository.deleteById(id);
+        return "redirect:/painel-mestre-bjj/professores/listar";
+    }
+
+    // --- CRUD TURMAS ---
+
     @GetMapping("/turmas/nova")
     public String formularioTurma(Model model) {
         model.addAttribute("turma", new Turma());
         model.addAttribute("professores", professorRepository.findAll());
-        model.addAttribute("todosDias", DiaSemana.values()); // Adicionado aqui
+        model.addAttribute("todosDias", DiaSemana.values());
         return "admin/cadastro-turma";
     }
 
@@ -70,6 +104,22 @@ public class AdminController {
         turmaRepository.save(turma);
         return "redirect:/painel-mestre-bjj/turmas/listar";
     }
+
+    @GetMapping("/turmas/listar")
+    public String listarTurmas(Model model) {
+        model.addAttribute("turmas", turmaRepository.findAll());
+        return "admin/lista-turmas";
+    }
+
+    @GetMapping("/turmas/detalhes/{id}")
+    public String detalhesTurma(@PathVariable Long id, Model model) {
+        Turma turma = turmaRepository.findById(id).orElseThrow();
+        model.addAttribute("turma", turma);
+        model.addAttribute("alunos", turma.getAlunos()); 
+        return "admin/detalhes-turma";
+    }
+
+    // --- CRUD ALUNOS ---
 
     @GetMapping("/alunos/novo")
     public String formularioAluno(Model model) {
@@ -105,20 +155,6 @@ public class AdminController {
         
         alunoRepository.save(aluno);
         return "redirect:/painel-mestre-bjj/turmas/listar";
-    }
-
-    @GetMapping("/turmas/listar")
-    public String listarTurmas(Model model) {
-        model.addAttribute("turmas", turmaRepository.findAll());
-        return "admin/lista-turmas";
-    }
-
-    @GetMapping("/turmas/detalhes/{id}")
-    public String detalhesTurma(@PathVariable Long id, Model model) {
-        Turma turma = turmaRepository.findById(id).orElseThrow();
-        model.addAttribute("turma", turma);
-        model.addAttribute("alunos", turma.getAlunos()); 
-        return "admin/detalhes-turma";
     }
 
     @GetMapping("/alunos/foto/{id}")
