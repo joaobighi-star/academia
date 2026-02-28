@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lidmaatschapsovereenkomst - DOJODAN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: white; font-family: "Helvetica", "Arial", sans-serif; color: #333; line-height: 1.6; }
+        .contrato-container { padding: 60px; border: 1px solid #eee; margin-top: 20px; max-width: 900px; background: #fff; }
+        .header-logo { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
+        .section-title { font-weight: bold; text-decoration: underline; margin-top: 20px; display: block; }
+        .data-field { font-weight: bold; border-bottom: 1px dotted #000; padding: 0 5px; }
+        .signature-box { margin-top: 50px; }
+        .line { border-top: 1px solid #000; margin-top: 40px; width: 100%; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .contrato-container { border: none; padding: 0; margin: 0; width: 100%; max-width: 100%; }
+            body { margin: 1cm; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container no-print mt-4 text-center">
+        <div class="alert alert-info d-inline-block">
+            <i class="bi bi-info-circle"></i> Controleer de gegevens voordat u afdrukt.
+        </div>
+        <br>
+        <button onclick="window.print()" class="btn btn-dark btn-lg px-5">
+            <i class="bi bi-printer"></i> PRINT CONTRACT
+        </button>
+        <a th:href="@{/painel-mestre-bjj/alunos/listar}" class="btn btn-outline-secondary btn-lg ms-2">Terug</a>
+    </div>
+
+    <div class="container contrato-container shadow-sm mb-5">
+        
+        <div class="header-logo">
+            <h1 class="fw-bold">BRAZILIAN JIU-JITSU DOJODAN</h1>
+            <p class="mb-0">Lidmaatschapsovereenkomst</p>
+        </div>
+
+        <p>Deze lidmaatschapsovereenkomst wordt aangegaan tussen:</p>
+        
+        <p><strong>Academie:</strong><br>
+        BRAZILIAN JIU-JITSU DOJODAN<br>
+        Hierna te noemen: “De Academie”</p>
+
+        <p>en</p>
+
+        <p><strong>Leerling:</strong></p>
+        <p>Naam: <span class="data-field" th:text="${aluno.nome}">[Nome do Aluno]</span></p>
+        <p>BSN: <span class="data-field" th:text="${aluno.bsn}">[Número BSN]</span></p>
+        <p>IBAN: <span class="data-field" th:text="${aluno.iban}">[Número IBAN]</span></p>
+        <p th:if="${aluno.nomeResponsavel != null and !aluno.nomeResponsavel.isEmpty()}">
+            Wettelijke vertegenwoordiger: <span class="data-field" th:text="${aluno.nomeResponsavel}">[Nome do Responsável]</span>
+        </p>
+        <p>Hierna te noemen: “De Leerling”</p>
+
+        <hr>
+
+        <p><span class="section-title">Artikel 1 – Doel van de overeenkomst</span><br>
+        Deze overeenkomst heeft als doel het vastleggen van de voorwaarden waaronder de Leerling deelneemt aan de trainingen van de BRAZILIAN JIU-JITSU DOJODAN.</p>
+
+        <p><span class="section-title">Artikel 2 – Lidmaatschap en Trainingen</span><br>
+        2.1 De Leerling heeft het recht om deel te nemen aan twee (2) trainingen per week.<br>
+        2.2 De trainingen vinden plaats binnen de klasse “Competitors” (Competidores).<br>
+        2.3 Het trainingsschema wordt vastgesteld door de Academie en kan indien nodig worden aangepast.</p>
+
+        <p><span class="section-title">Artikel 3 – Financiële voorwaarden</span><br>
+        3.1 De maandelijkse contributie bedraagt €120,00 (honderdtwintig euro).<br>
+        3.2 Betaling geschiedt maandelijks via bankoverschrijving.<br>
+        3.3 De contributie dient uiterlijk op de 1e dag van elke maand te zijn voldaan.<br>
+        3.4 Bij niet-tijdige betaling behoudt de Academie zich het recht voor om de toegang tot de trainingen tijdelijk op te schorten.</p>
+
+        <p><span class="section-title">Artikel 4 – Duur en beëindiging</span><br>
+        4.1 Deze overeenkomst wordt aangegaan voor onbepaalde tijd.<br>
+        4.2 Opzegging dient schriftelijk te gebeuren met een opzegtermijn van één (1) maand.<br>
+        4.3 Reeds betaalde contributies worden niet gerestitueerd.</p>
+
+        <p><span class="section-title">Artikel 5 – Gezondheid en aansprakelijkheid</span><br>
+        5.1 De Leerling verklaart medisch geschikt te zijn om Brazilian Jiu-Jitsu te beoefenen.<br>
+        5.2 Deelname aan trainingen geschiedt op eigen risico.<br>
+        5.3 De Academie is niet aansprakelijk voor blessures, verlies of diefstal van persoonlijke eigendommen, tenzij sprake is van grove nalatigheid.</p>
+
+        <p><span class="section-title">Artikel 6 – Gedrag en discipline</span><br>
+        6.1 De Leerling verplicht zich de regels, instructies en gedragsnormen van de Academie na te leven.<br>
+        6.2 Ongepast gedrag kan leiden tot tijdelijke of definitieve uitsluiting zonder restitutie.</p>
+
+        <p><span class="section-title">Artikel 7 – Toepasselijk recht</span><br>
+        7.1 Op deze overeenkomst is uitsluitend het Nederlands recht van toepassing.<br>
+        7.2 Geschillen zullen worden voorgelegd aan de bevoegde rechter in Nederland.</p>
+
+        <p><span class="section-title">Artikel 8 – Slotbepalingen</span><br>
+        8.1 Wijzigingen in deze overeenkomst zijn slechts geldig indien schriftelijk vastgelegd.<br>
+        8.2 Indien een bepaling ongeldig blijkt, blijven de overige bepalingen volledig van kracht.</p>
+
+        <div class="mt-5">
+            <p>Aldus overeengekomen en ondertekend:</p>
+            <p>Plaats: <span class="data-field">__________________________</span></p>
+            <p>Datum: <span class="data-field" th:text="${#temporals.format(dataAtual, 'dd / MM / yyyy')}"></span></p>
+        </div>
+
+        <div class="row signature-box text-center">
+            <div class="col-6">
+                <div class="line"></div>
+                <p><strong>Voor de Academie:</strong><br>Naam: __________________</p>
+            </div>
+            <div class="col-6">
+                <div class="line"></div>
+                <p><strong>De Leerling:</strong><br>
+                   <span th:text="${aluno.nome}">Naam Aluno</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

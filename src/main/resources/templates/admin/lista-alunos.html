@@ -9,6 +9,8 @@
     <style>
         .img-aluno { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
         .table-container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-print { background-color: #6c757d; color: white; }
+        .btn-print:hover { background-color: #495057; color: white; }
     </style>
 </head>
 <body class="bg-light">
@@ -60,10 +62,16 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group shadow-sm">
+                                    <a th:href="@{/painel-mestre-bjj/alunos/contrato/{id}(id=${aluno.id})}" 
+                                       class="btn btn-sm btn-print" title="Imprimir Contrato" target="_blank">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+
                                     <a th:href="@{/painel-mestre-bjj/alunos/editar/{id}(id=${aluno.id})}" 
                                        class="btn btn-sm btn-warning" title="Editar Aluno">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
+                                    
                                     <a th:href="@{/painel-mestre-bjj/alunos/excluir/{id}(id=${aluno.id})}" 
                                        class="btn btn-sm btn-danger" 
                                        onclick="return confirm('Tem certeza que deseja excluir este aluno? Todos os dados serão perdidos.')"

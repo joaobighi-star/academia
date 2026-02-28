@@ -25,13 +25,15 @@ public class AlunoRestController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ✅ CREATE
+    // ✅ CREATE - Agora utiliza o BSN como senha padrão
     @PostMapping
     public ResponseEntity<Aluno> criar(@RequestBody Aluno aluno) {
 
         Usuario user = new Usuario();
         user.setEmail(aluno.getUsuario().getEmail());
-        user.setSenha(passwordEncoder.encode(aluno.getCpf()));
+        
+        // A senha inicial passa a ser o BSN (9 dígitos) em vez do CPF
+        user.setSenha(passwordEncoder.encode(aluno.getBsn()));
         user.setPerfis(Set.of(Perfil.ROLE_ALUNO));
         user.setSenhaAlteradaPeloAdmin(false);
 
@@ -57,7 +59,7 @@ public class AlunoRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ UPDATE
+    // ✅ UPDATE - Campos BSN e IBAN incluídos
     @PutMapping("/{id}")
     public ResponseEntity<Aluno> atualizar(@PathVariable Long id,
                                            @RequestBody Aluno alunoAtualizado) {
@@ -65,10 +67,13 @@ public class AlunoRestController {
         return alunoRepository.findById(id)
                 .map(aluno -> {
                     aluno.setNome(alunoAtualizado.getNome());
-                    aluno.setCpf(alunoAtualizado.getCpf());
+                    aluno.setBsn(alunoAtualizado.getBsn()); // Alterado para BSN
+                    aluno.setIban(alunoAtualizado.getIban()); // Adicionado IBAN
                     aluno.setTelefone(alunoAtualizado.getTelefone());
                     aluno.setStatusMensalidade(alunoAtualizado.getStatusMensalidade());
                     aluno.setTurma(alunoAtualizado.getTurma());
+                    
+                    // A data de vencimento foi removida pois o débito é via IBAN
 
                     Aluno salvo = alunoRepository.save(aluno);
                     return ResponseEntity.ok(salvo);
@@ -79,11 +84,9 @@ public class AlunoRestController {
     // ✅ DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-
         if (!alunoRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
         alunoRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

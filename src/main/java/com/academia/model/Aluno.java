@@ -4,22 +4,30 @@ import com.academia.enums.Faixa;
 import com.academia.enums.StatusMensalidade;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 import java.time.LocalDate;
 import java.time.Period;
 
 @Entity
 @Data
 public class Aluno {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Usuario usuario;
 
     private String nome;
-    private String cpf;
+    
+    @Column(length = 9) // BSN holandês
+    private String bsn;
+    
     private String telefone;
     private String nomeResponsavel;
     private LocalDate dataNascimento;
@@ -39,10 +47,13 @@ public class Aluno {
     @Enumerated(EnumType.STRING)
     private StatusMensalidade statusMensalidade;
 
-    private LocalDate dataVencimento;
+    @Column(length = 34) // IBAN Internacional
+    private String iban;
 
     @ManyToOne
     @JoinColumn(name = "turma_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Turma turma;
 
     // --- LÓGICA DE PROGRESSÃO DINÂMICA ---
@@ -58,8 +69,8 @@ public class Aluno {
     }
 
     public int getAulasPorGrau() {
-        // Divide a meta da faixa por 4 (10 aulas se meta 40, 20 aulas se meta 80)
-        return getMetaAulasNovaFaixa() / 4;
+        Integer meta = getMetaAulasNovaFaixa();
+        return (meta != null) ? meta / 4 : 10;
     }
 
     public boolean temDireitoANovoGrau() {
@@ -69,7 +80,6 @@ public class Aluno {
         int grausSugeridos = this.aulasAssistidas / aulasPorGrau;
         int grauAtual = (this.ultimoGrauRecebido != null) ? this.ultimoGrauRecebido : 0;
         
-        // Retorna true se ele atingiu presenças para um novo grau que ainda não recebeu (limite 4)
         return grausSugeridos > grauAtual && grausSugeridos <= 4;
     }
 
@@ -80,15 +90,17 @@ public class Aluno {
         return Math.min(percentual, 100.0);
     }
 
-    // --- GETTERS E SETTERS (Padrão) ---
+    // --- GETTERS E SETTERS (O Lombok @Data já gera, mas mantidos para compatibilidade) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
+    public String getBsn() { return bsn; }
+    public void setBsn(String bsn) { this.bsn = bsn; }
+    public String getIban() { return iban; }
+    public void setIban(String iban) { this.iban = iban; }
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
     public String getNomeResponsavel() { return nomeResponsavel; }
@@ -109,8 +121,6 @@ public class Aluno {
     public void setUltimoGrauRecebido(Integer ultimoGrauRecebido) { this.ultimoGrauRecebido = ultimoGrauRecebido; }
     public StatusMensalidade getStatusMensalidade() { return statusMensalidade; }
     public void setStatusMensalidade(StatusMensalidade statusMensalidade) { this.statusMensalidade = statusMensalidade; }
-    public LocalDate getDataVencimento() { return dataVencimento; }
-    public void setDataVencimento(LocalDate dataVencimento) { this.dataVencimento = dataVencimento; }
     public Turma getTurma() { return turma; }
     public void setTurma(Turma turma) { this.turma = turma; }
 }

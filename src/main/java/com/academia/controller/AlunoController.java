@@ -44,6 +44,12 @@ public class AlunoController {
         
         model.addAttribute("aluno", aluno);
         model.addAttribute("aulas", minhasAulas);
+
+        // --- LÓGICA DE GAMIFICAÇÃO (KIDS/TEENS) ---
+        // Dispara o card de boas-vindas na primeira aula para alunos < 15 anos
+        if (aluno.getAulasAssistidas() == 1 && aluno.getIdade() < 15) {
+            model.addAttribute("showWelcomeCard", true);
+        }
         
         return "aluno/perfil";
     }

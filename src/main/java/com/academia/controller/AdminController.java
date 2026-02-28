@@ -126,11 +126,11 @@ public class AdminController {
         return "admin/detalhes-turma";
     }
 
-    // --- CRUD ALUNOS (REVISADO) ---
+    // --- CRUD ALUNOS (ATUALIZADO PARA BSN/IBAN) ---
     @GetMapping("/alunos/listar")
     public String listarAlunos(Model model) {
         model.addAttribute("alunos", alunoRepository.findAll());
-        return "admin/lista-alunos"; // Certifique-se de ter este HTML
+        return "admin/lista-alunos";
     }
 
     @GetMapping("/alunos/novo")
@@ -141,9 +141,18 @@ public class AdminController {
         model.addAttribute("turmas", turmaRepository.findAll());
         return "admin/cadastro-aluno";
     }
+    
+    @GetMapping("/alunos/contrato/{id}")
+    public String imprimirContrato(@PathVariable Long id, Model model) {
+        Aluno aluno = alunoRepository.findById(id).orElseThrow();
+        model.addAttribute("aluno", aluno);
+        model.addAttribute("dataAtual", LocalDate.now());
+        return "admin/contrato-aluno"; // Criaremos este HTML abaixo
+    }
 
     @PostMapping("/alunos/salvar")
     public String salvarAluno(Aluno aluno, @RequestParam("imagem") MultipartFile imagem) throws IOException {
+        // Lógica de Foto
         if (!imagem.isEmpty()) {
             aluno.setFoto(imagem.getBytes());
         } else if (aluno.getId() != null) {
@@ -151,16 +160,20 @@ public class AdminController {
             aluno.setFoto(alunoExistente.getFoto());
         }
         
+        // Lógica de Usuário e Senha (BSN)
         if (aluno.getId() == null) {
             Usuario user = new Usuario();
             user.setEmail(aluno.getUsuario().getEmail());
-            user.setSenha(passwordEncoder.encode(aluno.getCpf().replaceAll("\\D", ""))); // Senha é o CPF limpo
+            
+            // CORREÇÃO: O erro estava aqui. Agora usamos getBsn() como senha.
+            user.setSenha(passwordEncoder.encode(aluno.getBsn())); 
+            
             user.setPerfis(Set.of(Perfil.ROLE_ALUNO));
             user.setSenhaAlteradaPeloAdmin(false);
             aluno.setUsuario(user);
             aluno.setStatusMensalidade(StatusMensalidade.EM_DIA);
         } else {
-            // Se for edição, mantém os dados de usuário originais
+            // Edição: Mantém credenciais originais
             Aluno existente = alunoRepository.findById(aluno.getId()).orElseThrow();
             aluno.getUsuario().setId(existente.getUsuario().getId());
             aluno.getUsuario().setSenha(existente.getUsuario().getSenha());
@@ -168,7 +181,6 @@ public class AdminController {
         }
         
         alunoRepository.save(aluno);
-        // CORREÇÃO: Agora redireciona para a lista de ALUNOS, não de turmas
         return "redirect:/painel-mestre-bjj/alunos/listar";
     }
 
