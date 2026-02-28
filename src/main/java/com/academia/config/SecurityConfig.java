@@ -18,27 +18,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Recursos estáticos liberados
-                .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
+                // AJUSTE SEO: Permitindo acesso público aos arquivos de SEO e recursos estáticos
+                .requestMatchers("/css/**", "/js/**", "/img/**", "/robots.txt", "/sitemap.xml").permitAll()
                 
-                // Rotas públicas
+                // Rotas de autenticação pública
                 .requestMatchers("/recuperar-senha/**", "/login").permitAll()
                 
-                // LIBERAÇÃO DAS FOTOS: Deve vir ANTES da regra restrita do /aluno/**
-                // Permite que Admin e Professores vejam as fotos dos alunos também
+                // Controle de acesso por ROLES
                 .requestMatchers("/aluno/foto/**").hasAnyRole("ADMIN", "PROFESSOR", "ALUNO")
-                
-                // Restrições por Role
                 .requestMatchers("/painel-mestre-bjj/**").hasRole("ADMIN")
                 .requestMatchers("/professor/**").hasRole("PROFESSOR")
                 .requestMatchers("/aluno/**").hasRole("ALUNO")
                 
-                // Qualquer outra requisição (como /home) exige login
+                // Qualquer outra rota exige login
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/home", true) // Direciona para o redirectByRole do LoginController
+                .defaultSuccessUrl("/home", true)
                 .permitAll()
             )
             .exceptionHandling(ex -> ex
@@ -61,8 +58,8 @@ public class SecurityConfig {
 
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
-        // Retornamos 403 (Forbidden) para facilitar o debug de acesso negado
         return (request, response, accessDeniedException) -> {
+            // Em vez de redirecionar, envia um erro 403 puro (mais seguro para APIs e rotas internas)
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
         };
     }

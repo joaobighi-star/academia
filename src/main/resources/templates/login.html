@@ -3,57 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Acesse sua conta no DOJODAN, sua plataforma de gestão de tatame.">
-    <title>Login - DOJODAN</title>
+    <meta name="description" content="Acesse o DOJODAN, a plataforma oficial para gestão de tatame, chamadas e graduações de Jiu-Jitsu.">
+    <title>Login | DOJODAN - Gestão de Tatame</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-    <main class="bg-login">
-        <div class="card card-login border-0">
-            <div class="card-body text-center p-2">
+    <main class="bg-login d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+        <article class="card card-login border-0 shadow">
+            <div class="card-body text-center p-4">
                 
                 <div class="logo-bjj" aria-hidden="true">
-                    <i class="bi bi-shield-check"></i>
+                    <i class="bi bi-shield-check" style="font-size: 3rem; color: #0d6efd;"></i>
                 </div>
 
-                <h2 class="fw-bold">DOJODAN</h2>
+                <h1 class="h2 fw-bold mb-4">DOJODAN</h1>
 
                 <form th:action="@{/login}" method="post" class="text-start">
                     
                     <div class="mb-3">
-                        <label for="username" class="form-label small fw-bold text-uppercase opacity-75">E-mail</label>
+                        <label for="username" class="form-label small fw-bold text-uppercase opacity-75">E-mail de acesso</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-envelope" aria-hidden="true"></i></span>
-                            <input type="email" id="username" name="username" class="form-control" placeholder="seu@email.com" required autofocus>
+                            <input type="email" id="username" name="username" class="form-control" placeholder="exemplo@dominio.com" required autofocus>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label for="password" class="form-label small fw-bold text-uppercase opacity-75">Senha</label>
+                        <label for="password" class="form-label small fw-bold text-uppercase opacity-75">Sua Senha</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-key" aria-hidden="true"></i></span>
                             <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                    <button type="submit" class="btn btn-primary w-100 mb-3 fw-bold" aria-label="Entrar no sistema DOJODAN">
                         ENTRAR NO TATAME
                     </button>
                 </form>
 
                 <div class="text-center">
-                    <a th:href="@{/recuperar-senha}" class="text-decoration-none link-muted">
+                    <a th:href="@{/recuperar-senha}" class="text-decoration-none text-secondary small" title="Recuperar acesso à conta">
                         Esqueci minha senha
                     </a>
                 </div>
                 
             </div>
-        </div>
+        </article>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

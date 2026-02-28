@@ -13,6 +13,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
@@ -48,8 +49,60 @@ public class ProfessorController {
             
         model.addAttribute("turmas", turmas);
         model.addAttribute("solicitacoes", aulaParticularRepository.findByProfessorOrderByDataHoraAsc(prof));
+
+        List<Aluno> todosAlunos = alunoRepository.findAll();
+        
+        List<Aluno> solicitacoesFaixa = todosAlunos.stream()
+            .filter(Aluno::isSolicitouMudanca)
+            .collect(Collectors.toList());
+            
+        List<Aluno> alertasGraus = todosAlunos.stream()
+            .filter(a -> {
+                double p = a.getPercentualProgresso();
+                Integer ultimoGrau = (a.getUltimoGrauRecebido() != null) ? a.getUltimoGrauRecebido() : 0;
+                
+                if (p >= 75 && ultimoGrau < 3) return true;
+                if (p >= 50 && ultimoGrau < 2) return true;
+                if (p >= 25 && ultimoGrau < 1) return true;
+                return false;
+            }).collect(Collectors.toList());
+
+        model.addAttribute("solicitacoesFaixa", solicitacoesFaixa);
+        model.addAttribute("alertasGraus", alertasGraus);
         
         return "professor/painel";
+    }
+
+    @PostMapping("/confirmar-graduacao")
+    public String confirmarGraduacao(@RequestParam Long alunoId, @RequestParam String tipo) {
+        Aluno aluno = alunoRepository.findById(alunoId).orElseThrow();
+        
+        if ("grau".equals(tipo)) {
+            double p = aluno.getPercentualProgresso();
+            if (p >= 75) aluno.setUltimoGrauRecebido(3);
+            else if (p >= 50) aluno.setUltimoGrauRecebido(2);
+            else if (p >= 25) aluno.setUltimoGrauRecebido(1);
+        } else if ("faixa".equals(tipo)) {
+            aluno.setSolicitouMudanca(false);
+            aluno.setAulasAssistidas(0);
+            aluno.setUltimoGrauRecebido(0);
+        }
+        
+        alunoRepository.save(aluno);
+        return "redirect:/professor/painel";
+    }
+
+    @PostMapping("/registrar-presenca")
+    public String registrarPresenca(@RequestParam Long turmaId, 
+                                    @RequestParam(required = false) List<Long> alunoIds) {
+        if (alunoIds != null) {
+            for (Long id : alunoIds) {
+                Aluno a = alunoRepository.findById(id).orElseThrow();
+                a.setAulasAssistidas(a.getAulasAssistidas() + 1);
+                alunoRepository.save(a);
+            }
+        }
+        return "redirect:/professor/painel?sucessoChamada=true";
     }
 
     @GetMapping("/agenda")
@@ -120,7 +173,6 @@ public class ProfessorController {
                              @RequestParam(required = false) String mensagem) {
         AulaParticular aula = aulaParticularRepository.findById(aulaId).orElseThrow();
         
-        // Salva a mensagem do professor se houver
         aula.setMensagemProfessor(mensagem);
         
         if (decisao.equals("aceitar")) {

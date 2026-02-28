@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /h2-console/
+Sitemap: https://dojodan.com.br/sitemap.xml

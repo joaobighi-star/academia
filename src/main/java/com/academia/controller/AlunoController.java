@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -39,13 +40,27 @@ public class AlunoController {
     public String exibirPerfil(Model model, Authentication auth) {
         Aluno aluno = buscarAlunoLogado(auth);
         
-        // Busca as aulas agendadas para exibir no perfil
         List<AulaParticular> minhasAulas = aulaParticularRepository.findByAlunoOrderByDataHoraAsc(aluno);
         
         model.addAttribute("aluno", aluno);
         model.addAttribute("aulas", minhasAulas);
         
         return "aluno/perfil";
+    }
+
+    @PostMapping("/solicitar-faixa")
+    public String solicitarMudancaFaixa(Authentication auth, RedirectAttributes attributes) {
+        Aluno aluno = buscarAlunoLogado(auth);
+        
+        if (aluno.getPercentualProgresso() >= 100) {
+            aluno.setSolicitouMudanca(true);
+            alunoRepository.save(aluno);
+            attributes.addFlashAttribute("mensagemSucesso", "Solicitação enviada ao mestre com sucesso!");
+        } else {
+            attributes.addFlashAttribute("mensagemErro", "Você ainda não atingiu a meta de aulas.");
+        }
+        
+        return "redirect:/aluno/perfil";
     }
 
     @GetMapping("/foto/{id}")

@@ -3,7 +3,6 @@ package com.academia.controller;
 import com.academia.enums.Perfil;
 import com.academia.enums.StatusMensalidade;
 import com.academia.enums.DiaSemana;
-import com.academia.enums.Faixa; // Importante
 import com.academia.model.Aluno;
 import com.academia.model.Professor;
 import com.academia.model.Turma;
@@ -41,7 +40,6 @@ public class AdminController {
     }
 
     // --- CRUD PROFESSORES ---
-
     @GetMapping("/professores/listar")
     public String listarProfessores(Model model) {
         model.addAttribute("professores", professorRepository.findAll());
@@ -57,29 +55,25 @@ public class AdminController {
     @PostMapping("/professores/salvar")
     public String salvarProfessor(@ModelAttribute Professor professor) {
         if (professor.getId() == null) {
-            // Novo Professor: Criar usuário do zero
             Usuario user = new Usuario();
             user.setEmail(professor.getUsuario().getEmail());
-            user.setSenha(passwordEncoder.encode("prof123")); // Senha padrão
+            user.setSenha(passwordEncoder.encode("prof123"));
             user.setPerfis(Set.of(Perfil.ROLE_PROFESSOR));
             user.setSenhaAlteradaPeloAdmin(false);
             professor.setUsuario(user);
         } else {
-            // Edição: Manter o usuário existente
             Professor existente = professorRepository.findById(professor.getId()).orElseThrow();
             professor.getUsuario().setId(existente.getUsuario().getId());
             professor.getUsuario().setSenha(existente.getUsuario().getSenha());
             professor.getUsuario().setPerfis(existente.getUsuario().getPerfis());
         }
-        
         professorRepository.save(professor);
         return "redirect:/painel-mestre-bjj/professores/listar";
     }
 
     @GetMapping("/professores/editar/{id}")
     public String editarProfessor(@PathVariable Long id, Model model) {
-        Professor prof = professorRepository.findById(id).orElseThrow();
-        model.addAttribute("professor", prof);
+        model.addAttribute("professor", professorRepository.findById(id).orElseThrow());
         return "admin/cadastro-professor";
     }
 
@@ -90,6 +84,11 @@ public class AdminController {
     }
 
     // --- CRUD TURMAS ---
+    @GetMapping("/turmas/listar")
+    public String listarTurmas(Model model) {
+        model.addAttribute("turmas", turmaRepository.findAll());
+        return "admin/lista-turmas";
+    }
 
     @GetMapping("/turmas/nova")
     public String formularioTurma(Model model) {
@@ -104,11 +103,19 @@ public class AdminController {
         turmaRepository.save(turma);
         return "redirect:/painel-mestre-bjj/turmas/listar";
     }
+    
+    @GetMapping("/turmas/editar/{id}")
+    public String editarTurma(@PathVariable Long id, Model model) {
+        model.addAttribute("turma", turmaRepository.findById(id).orElseThrow());
+        model.addAttribute("professores", professorRepository.findAll());
+        model.addAttribute("todosDias", DiaSemana.values());
+        return "admin/cadastro-turma";
+    }
 
-    @GetMapping("/turmas/listar")
-    public String listarTurmas(Model model) {
-        model.addAttribute("turmas", turmaRepository.findAll());
-        return "admin/lista-turmas";
+    @GetMapping("/turmas/excluir/{id}")
+    public String excluirTurma(@PathVariable Long id) {
+        turmaRepository.deleteById(id);
+        return "redirect:/painel-mestre-bjj/turmas/listar";
     }
 
     @GetMapping("/turmas/detalhes/{id}")
@@ -119,7 +126,12 @@ public class AdminController {
         return "admin/detalhes-turma";
     }
 
-    // --- CRUD ALUNOS ---
+    // --- CRUD ALUNOS (REVISADO) ---
+    @GetMapping("/alunos/listar")
+    public String listarAlunos(Model model) {
+        model.addAttribute("alunos", alunoRepository.findAll());
+        return "admin/lista-alunos"; // Certifique-se de ter este HTML
+    }
 
     @GetMapping("/alunos/novo")
     public String formularioAluno(Model model) {
@@ -142,19 +154,35 @@ public class AdminController {
         if (aluno.getId() == null) {
             Usuario user = new Usuario();
             user.setEmail(aluno.getUsuario().getEmail());
-            user.setSenha(passwordEncoder.encode(aluno.getCpf()));
+            user.setSenha(passwordEncoder.encode(aluno.getCpf().replaceAll("\\D", ""))); // Senha é o CPF limpo
             user.setPerfis(Set.of(Perfil.ROLE_ALUNO));
             user.setSenhaAlteradaPeloAdmin(false);
             aluno.setUsuario(user);
             aluno.setStatusMensalidade(StatusMensalidade.EM_DIA);
-            
-            if (aluno.getDataMatricula() == null) {
-                aluno.setDataMatricula(LocalDate.now());
-            }
+        } else {
+            // Se for edição, mantém os dados de usuário originais
+            Aluno existente = alunoRepository.findById(aluno.getId()).orElseThrow();
+            aluno.getUsuario().setId(existente.getUsuario().getId());
+            aluno.getUsuario().setSenha(existente.getUsuario().getSenha());
+            aluno.getUsuario().setPerfis(existente.getUsuario().getPerfis());
         }
         
         alunoRepository.save(aluno);
-        return "redirect:/painel-mestre-bjj/turmas/listar";
+        // CORREÇÃO: Agora redireciona para a lista de ALUNOS, não de turmas
+        return "redirect:/painel-mestre-bjj/alunos/listar";
+    }
+
+    @GetMapping("/alunos/editar/{id}")
+    public String editarAluno(@PathVariable Long id, Model model) {
+        model.addAttribute("aluno", alunoRepository.findById(id).orElseThrow());
+        model.addAttribute("turmas", turmaRepository.findAll());
+        return "admin/cadastro-aluno";
+    }
+
+    @GetMapping("/alunos/excluir/{id}")
+    public String excluirAluno(@PathVariable Long id) {
+        alunoRepository.deleteById(id);
+        return "redirect:/painel-mestre-bjj/alunos/listar";
     }
 
     @GetMapping("/alunos/foto/{id}")
