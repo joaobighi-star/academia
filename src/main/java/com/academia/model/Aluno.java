@@ -5,6 +5,7 @@ import com.academia.enums.StatusMensalidade;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.Period;
 
 @Entity
 @Data
@@ -32,11 +33,8 @@ public class Aluno {
     private Faixa faixa;
 
     private Integer aulasAssistidas = 0;
-    private Integer metaAulasNovaFaixa = 50;
-
-    // Novos campos para a lógica de progressão
     private boolean solicitouMudanca = false;
-    private Integer ultimoGrauRecebido = 0; // 0 a 3 graus
+    private Integer ultimoGrauRecebido = 0; 
 
     @Enumerated(EnumType.STRING)
     private StatusMensalidade statusMensalidade;
@@ -47,9 +45,42 @@ public class Aluno {
     @JoinColumn(name = "turma_id")
     private Turma turma;
 
-    // --- Getters e Setters ---
-    // (Mantive os que você já tinha e adicionei os novos)
+    // --- LÓGICA DE PROGRESSÃO DINÂMICA ---
 
+    public int getIdade() {
+        if (this.dataNascimento == null) return 0;
+        return Period.between(this.dataNascimento, LocalDate.now()).getYears();
+    }
+
+    public Integer getMetaAulasNovaFaixa() {
+        if (this.faixa == null) return 40;
+        return this.faixa.getMetaAulas();
+    }
+
+    public int getAulasPorGrau() {
+        // Divide a meta da faixa por 4 (10 aulas se meta 40, 20 aulas se meta 80)
+        return getMetaAulasNovaFaixa() / 4;
+    }
+
+    public boolean temDireitoANovoGrau() {
+        int aulasPorGrau = getAulasPorGrau();
+        if (aulasPorGrau == 0) return false;
+        
+        int grausSugeridos = this.aulasAssistidas / aulasPorGrau;
+        int grauAtual = (this.ultimoGrauRecebido != null) ? this.ultimoGrauRecebido : 0;
+        
+        // Retorna true se ele atingiu presenças para um novo grau que ainda não recebeu (limite 4)
+        return grausSugeridos > grauAtual && grausSugeridos <= 4;
+    }
+
+    public double getPercentualProgresso() {
+        Integer meta = getMetaAulasNovaFaixa();
+        if (meta == null || meta == 0) return 0;
+        double percentual = (double) aulasAssistidas * 100 / meta;
+        return Math.min(percentual, 100.0);
+    }
+
+    // --- GETTERS E SETTERS (Padrão) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Usuario getUsuario() { return usuario; }
@@ -72,24 +103,14 @@ public class Aluno {
     public void setFaixa(Faixa faixa) { this.faixa = faixa; }
     public Integer getAulasAssistidas() { return aulasAssistidas; }
     public void setAulasAssistidas(Integer aulasAssistidas) { this.aulasAssistidas = aulasAssistidas; }
-    public Integer getMetaAulasNovaFaixa() { return metaAulasNovaFaixa; }
-    public void setMetaAulasNovaFaixa(Integer metaAulasNovaFaixa) { this.metaAulasNovaFaixa = metaAulasNovaFaixa; }
-    
     public boolean isSolicitouMudanca() { return solicitouMudanca; }
     public void setSolicitouMudanca(boolean solicitouMudanca) { this.solicitouMudanca = solicitouMudanca; }
     public Integer getUltimoGrauRecebido() { return ultimoGrauRecebido; }
     public void setUltimoGrauRecebido(Integer ultimoGrauRecebido) { this.ultimoGrauRecebido = ultimoGrauRecebido; }
-
     public StatusMensalidade getStatusMensalidade() { return statusMensalidade; }
     public void setStatusMensalidade(StatusMensalidade statusMensalidade) { this.statusMensalidade = statusMensalidade; }
     public LocalDate getDataVencimento() { return dataVencimento; }
     public void setDataVencimento(LocalDate dataVencimento) { this.dataVencimento = dataVencimento; }
     public Turma getTurma() { return turma; }
     public void setTurma(Turma turma) { this.turma = turma; }
-
-    // Helper method para calcular o percentual (útil para o Lighthouse e lógica interna)
-    public double getPercentualProgresso() {
-        if (metaAulasNovaFaixa == 0) return 0;
-        return (double) aulasAssistidas * 100 / metaAulasNovaFaixa;
-    }
 }

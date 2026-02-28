@@ -7,24 +7,26 @@
     <title>Matrícula de Aluno - BJJ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Ajuste para garantir contraste no alerta de aviso */
         .alert-warning-contrast {
             background-color: #fff3cd;
             border: 1px solid #856404;
             color: #433302;
         }
+        /* Estilização suave para o card */
+        .card { border-radius: 15px; overflow: hidden; }
+        .card-header { background: linear-gradient(45deg, #0d6efd, #0b5ed7); }
     </style>
 </head>
 <body class="bg-light">
     <main class="container mt-5 mb-5">
         <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h1 class="h3 mb-0">Cadastrar Novo Aluno</h1>
+            <div class="card-header text-white py-3">
+                <h1 class="h3 mb-0 text-center">Cadastrar Novo Aluno</h1>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form th:action="@{/painel-mestre-bjj/alunos/salvar}" th:object="${aluno}" method="post" enctype="multipart/form-data">
                     
-                    <div class="mb-4 p-3 border rounded bg-white shadow-sm">
+                    <div class="mb-4 p-3 border rounded bg-white shadow-sm border-primary">
                         <label for="turmaSelect" class="form-label fw-bold text-primary">Vincular a uma Turma</label>
                         <select th:field="*{turma}" id="turmaSelect" class="form-select form-select-lg" required>
                             <option value="">-- Selecione a Turma --</option>
@@ -62,29 +64,30 @@
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label for="email" class="form-label">E-mail (Login do Aluno)</label>
+                            <label for="email" class="form-label fw-bold">E-mail (Login do Aluno)</label>
                             <input type="email" th:field="*{usuario.email}" id="email" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="cpf" class="form-label">CPF (Senha Inicial)</label>
-                            <input type="text" th:field="*{cpf}" id="cpf" class="form-control" required>
+                            <label for="cpf" class="form-label fw-bold">CPF (Senha Inicial)</label>
+                            <input type="text" th:field="*{cpf}" id="cpf" class="form-control" required maxlength="14">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="dataMatricula" class="form-label">Data de Matrícula</label>
+                            <label for="dataMatricula" class="form-label fw-bold">Data de Matrícula</label>
                             <input type="date" th:field="*{dataMatricula}" id="dataMatricula" class="form-control" required>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="faixa" class="form-label">Faixa Atual</label>
+                            <label for="faixa" class="form-label fw-bold">Faixa Atual</label>
                             <select th:field="*{faixa}" id="faixa" class="form-select">
                                 <option th:each="f : ${T(com.academia.enums.Faixa).values()}" 
-                                        th:value="${f}" th:text="${f}"></option>
+                                        th:value="${f}" 
+                                        th:text="${f.nomeExibicao}"></option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="dataVencimento" class="form-label text-primary fw-bold">Vencimento da Mensalidade (Dia)</label>
+                            <label for="dataVencimento" class="form-label text-primary fw-bold">Data do Primeiro Vencimento</label>
                             <input type="date" th:field="*{dataVencimento}" id="dataVencimento" class="form-control" required>
                         </div>
                     </div>
@@ -92,11 +95,11 @@
                     <div class="mb-4">
                         <label for="fotoPerfil" class="form-label fw-bold">Foto para o Perfil</label>
                         <input type="file" name="imagem" id="fotoPerfil" class="form-control" accept="image/*" required aria-describedby="fotoHelp">
-                        <div id="fotoHelp" class="form-text">Envie uma foto clara do rosto do aluno para o sistema.</div>
+                        <div id="fotoHelp" class="form-text">Envie uma foto clara do rosto do aluno.</div>
                     </div>
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a th:href="@{/painel-mestre-bjj}" class="btn btn-secondary px-4">Cancelar</a>
+                        <a th:href="@{/painel-mestre-bjj/alunos/listar}" class="btn btn-secondary px-4">Voltar</a>
                         <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">Finalizar Matrícula</button>
                     </div>
                 </form>
@@ -130,6 +133,8 @@
                 }
             }
         }
+        // Executa ao carregar caso seja edição
+        window.onload = checarMenorDeIdade;
     </script>
 </body>
 </html>
