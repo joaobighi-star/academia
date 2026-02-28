@@ -1,75 +1,92 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard administrativo da Academia BJJ. Gerencie professores, turmas e alunos em um só lugar.">
     <title>Painel Administrativo BJJ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        /* 2. Melhoria de contraste para o botão de Sair sobre o fundo escuro */
+        .btn-logout-custom {
+            color: #ffca28 !important; /* Amarelo vibrante */
+            border-color: #ffca28 !important;
+        }
+        .btn-logout-custom:hover {
+            background-color: #ffca28 !important;
+            color: #000 !important;
+        }
+    </style>
 </head>
 <body class="bg-light container mt-4">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 rounded px-3 shadow">
-        <a class="navbar-brand" href="#">
-            <i class="bi bi-shield-shaded"></i> Não existe obstáculo para o homen com um propósito
-        </a>
-        <div class="ms-auto">
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
-            </form>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 rounded px-3 shadow" aria-label="Navegação Principal">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shield-shaded" aria-hidden="true"></i> Não existe obstáculo para o homem com um propósito
+            </a>
+            <div class="ms-auto">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-outline-warning btn-sm btn-logout-custom">Sair</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div th:if="${trocarSenha}" class="alert alert-danger shadow-sm border-start border-5 border-danger mb-4" role="alert">
+            <h4 class="alert-heading">⚠️ Segurança em Risco!</h4>
+            <p>Você ainda está usando a senha inicial de mestre. Altere-a agora para proteger os dados da academia.</p>
+            <a th:href="@{/painel-mestre-bjj/trocar-senha}" class="btn btn-danger btn-sm">Alterar Minha Senha</a>
         </div>
-    </nav>
 
-    <div th:if="${trocarSenha}" class="alert alert-danger shadow-sm border-start border-5 border-danger mb-4">
-        <h4 class="alert-heading">⚠️ Segurança em Risco!</h4>
-        <p>Você ainda está usando a senha inicial de mestre. Altere-a agora para proteger os dados da academia.</p>
-        <a th:href="@{/painel-mestre-bjj/trocar-senha}" class="btn btn-danger btn-sm">Alterar Minha Senha</a>
-    </div>
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar alerta"></button>
+        </div>
 
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${success}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm text-center p-3">
-                <div class="card-body">
-                    <i class="bi bi-person-badge text-secondary fs-1"></i>
-                    <h5 class="card-title mt-2">1. Professores</h5>
-                    <p class="text-muted small">Cadastre os mestres antes de criar turmas.</p>
-                    <div class="d-grid gap-2">
-                        <a th:href="@{/painel-mestre-bjj/professores/novo}" class="btn btn-dark">Cadastrar Professor</a>
+        <div class="row g-4">
+            <section class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <i class="bi bi-person-badge text-secondary fs-1" aria-hidden="true"></i>
+                        <h2 class="h5 card-title mt-2">1. Professores</h2>
+                        <p class="text-muted small">Cadastre os mestres antes de criar turmas.</p>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/painel-mestre-bjj/professores/novo}" class="btn btn-dark">Cadastrar Professor</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm text-center p-3">
-                <div class="card-body">
-                    <i class="bi bi-calendar-event text-success fs-1"></i>
-                    <h5 class="card-title mt-2">2. Turmas</h5>
-                    <p class="text-muted small">Crie horários e designe professores.</p>
-                    <div class="d-grid gap-2">
-                        <a th:href="@{/painel-mestre-bjj/turmas/nova}" class="btn btn-success">Nova Turma</a>
-                        <a th:href="@{/painel-mestre-bjj/turmas/listar}" class="btn btn-outline-success">Ver Todas / Lista de Chamada</a>
+            <section class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-event text-success fs-1" aria-hidden="true"></i>
+                        <h2 class="h5 card-title mt-2">2. Turmas</h2>
+                        <p class="text-muted small">Crie horários e designe professores.</p>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/painel-mestre-bjj/turmas/nova}" class="btn btn-success">Nova Turma</a>
+                            <a th:href="@{/painel-mestre-bjj/turmas/listar}" class="btn btn-outline-success">Ver Todas / Lista de Chamada</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm text-center p-3">
-                <div class="card-body">
-                    <i class="bi bi-people-fill text-primary fs-1"></i>
-                    <h5 class="card-title mt-2">3. Alunos</h5>
-                    <p class="text-muted small">Matricule novos alunos diretamente nas turmas.</p>
-                    <div class="d-grid gap-2">
-                        <a th:href="@{/painel-mestre-bjj/alunos/novo}" class="btn btn-primary">Matricular Aluno</a>
+            <section class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill text-primary fs-1" aria-hidden="true"></i>
+                        <h2 class="h5 card-title mt-2">3. Alunos</h2>
+                        <p class="text-muted small">Matricule novos alunos diretamente nas turmas.</p>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/painel-mestre-bjj/alunos/novo}" class="btn btn-primary">Matricular Aluno</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

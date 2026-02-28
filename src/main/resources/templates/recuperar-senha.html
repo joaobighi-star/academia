@@ -1,21 +1,32 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Recuperar Senha</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Recupere o acesso à sua conta da Academia BJJ. Informe seu e-mail para receber uma senha temporária com segurança.">
+    <title>Recuperar Senha - BJJ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light d-flex align-items-center" style="height: 100vh;">
-    <div class="container card shadow" style="max-width: 400px;">
+    <main class="container card shadow" style="max-width: 400px;">
         <div class="card-body">
-            <h5 class="text-center">Esqueci minha senha</h5>
-            <p class="small text-muted">Digite seu e-mail para receber uma senha temporária.</p>
+            <h1 class="h5 text-center fw-bold">Esqueci minha senha</h1>
+            <p class="small text-muted text-center">Digite seu e-mail cadastrado para receber uma senha temporária.</p>
+            
             <form th:action="@{/recuperar-senha/enviar}" method="post">
-                <input type="email" name="email" class="form-control mb-3" required>
+                <div class="mb-3">
+                    <label for="emailRecuperacao" class="form-label fw-semibold">E-mail de acesso</label>
+                    <input type="email" name="email" id="emailRecuperacao" class="form-control" 
+                           placeholder="seu@email.com" required>
+                </div>
+                
                 <button type="submit" class="btn btn-primary w-100">Enviar E-mail</button>
             </form>
-            <div class="mt-3 text-center"><a href="/login">Voltar ao login</a></div>
+            
+            <div class="mt-3 text-center">
+                <a href="/login" class="text-decoration-none">Voltar ao login</a>
+            </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>
