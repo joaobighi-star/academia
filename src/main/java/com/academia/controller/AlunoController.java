@@ -45,10 +45,32 @@ public class AlunoController {
         model.addAttribute("aluno", aluno);
         model.addAttribute("aulas", minhasAulas);
 
-        // --- LÓGICA DE GAMIFICAÇÃO (KIDS/TEENS) ---
-        // Dispara o card de boas-vindas na primeira aula para alunos < 15 anos
-        if (aluno.getAulasAssistidas() == 1 && aluno.getIdade() < 15) {
-            model.addAttribute("showWelcomeCard", true);
+        // --- LÓGICA DE GAMIFICAÇÃO (KIDS/TEENS < 15 ANOS) ---
+        // Verifica marcos de 1 a 4 aulas para exibir cards comemorativos
+        if (aluno.getIdade() < 15) {
+            Integer totalAulas = aluno.getAulasAssistidas();
+            if (totalAulas != null && totalAulas >= 1 && totalAulas <= 4) {
+                model.addAttribute("showGamificationCard", true);
+                
+                switch (totalAulas) {
+                    case 1:
+                        model.addAttribute("cardImagem", "bemvindo.jpg");
+                        model.addAttribute("cardFrase", "Welkom bij Dojodan! Veel plezier!");
+                        break;
+                    case 2:
+                        model.addAttribute("cardImagem", "cheguei.jpg");
+                        model.addAttribute("cardFrase", "Je bent er weer!");
+                        break;
+                    case 3:
+                        model.addAttribute("cardImagem", "gordinho.jpg");
+                        model.addAttribute("cardFrase", "Je gaat echt super!");
+                        break;
+                    case 4:
+                        model.addAttribute("cardImagem", "dengosinha.jpg");
+                        model.addAttribute("cardFrase", "Goed zo, hou vol!");
+                        break;
+                }
+            }
         }
         
         return "aluno/perfil";

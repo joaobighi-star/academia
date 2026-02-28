@@ -1,66 +1,89 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Reservar Aula Particular</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Reserve sua aula particular de Jiu-Jitsu com os mestres da DOJODAN. Escolha os melhores horários disponíveis na semana.">
+    <title>Reservar Aula Particular | DOJODAN</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        /* Ajuste de Contraste para Acessibilidade */
+        .bg-primary-dark { background-color: #004a99 !important; }
+        .text-muted-dark { color: #555555 !important; } /* Cinza mais escuro para passar no Lighthouse */
+        .table-schedule th { vertical-align: middle; }
+        .btn-success { background-color: #198754; border-color: #198754; }
+        .btn-success:hover { background-color: #146c43; }
+        
+        /* Garantir que a tabela não quebre em telas pequenas e mantenha o contexto */
+        .table-responsive { border-radius: 12px; overflow: hidden; }
+    </style>
 </head>
 <body class="bg-light container py-4">
 
-    <div class="card shadow-sm mb-4 border-0">
-        <div class="card-body d-flex justify-content-between align-items-center bg-primary text-white rounded">
+    <header class="card shadow-sm mb-4 border-0">
+        <div class="card-body d-flex justify-content-between align-items-center bg-primary-dark text-white rounded">
             <div>
-                <h4 class="mb-0">Agendar com Mestre <span th:text="${professor.nome}"></span></h4>
-                <small>Escolha um horário disponível (verde) para solicitar sua aula</small>
+                <h1 class="h4 mb-0">Agendar com Mestre <span th:text="${professor.nome}"></span></h1>
+                <p class="mb-0 small opacity-90">Escolha um horário disponível (verde) para solicitar sua aula</p>
             </div>
-            <div class="d-flex gap-2">
-                <a th:href="@{/aluno/agendar-aula/professor/{id}(id=${professor.id}, dataBase=${semanaAnterior})}" class="btn btn-outline-light btn-sm">&lt; Anterior</a>
-                <a th:href="@{/aluno/agendar-aula/professor/{id}(id=${professor.id}, dataBase=${proximaSemana})}" class="btn btn-outline-light btn-sm">Próxima &gt;</a>
-                <a href="/aluno/agendar-aula" class="btn btn-light btn-sm">Trocar Professor</a>
-            </div>
+            <nav class="d-flex gap-2" aria-label="Navegação de datas">
+                <a th:href="@{/aluno/agendar-aula/professor/{id}(id=${professor.id}, dataBase=${semanaAnterior})}" 
+                   class="btn btn-outline-light btn-sm" aria-label="Semana anterior">&lt; Anterior</a>
+                <a th:href="@{/aluno/agendar-aula/professor/{id}(id=${professor.id}, dataBase=${proximaSemana})}" 
+                   class="btn btn-outline-light btn-sm" aria-label="Próxima semana">Próxima &gt;</a>
+                <a href="/aluno/agendar-aula" class="btn btn-light btn-sm fw-bold">Trocar Professor</a>
+            </nav>
         </div>
-    </div>
+    </header>
 
-    <div class="table-responsive bg-white p-3 rounded shadow-sm">
-        <table class="table table-bordered text-center align-middle">
+    <main class="table-responsive bg-white p-3 rounded shadow-sm">
+        <table class="table table-bordered text-center align-middle table-schedule">
             <thead class="table-light">
                 <tr>
-                    <th>Hora</th>
-                    <th th:each="dia : ${dias}">
-                        <span class="d-block fw-bold" th:text="${#temporals.format(dia, 'EEE')}"></span>
-                        <small class="text-muted" th:text="${#temporals.format(dia, 'dd/MM')}"></small>
+                    <th scope="col">Hora</th>
+                    <th scope="col" th:each="dia : ${dias}">
+                        <span class="d-block fw-bold text-dark" th:text="${#temporals.format(dia, 'EEE')}"></span>
+                        <small class="text-muted-dark" th:text="${#temporals.format(dia, 'dd/MM')}"></small>
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="h : ${horas}">
-                    <td class="fw-bold bg-light" th:text="${h + ':00'}"></td>
-                    <td th:each="dia : ${dias}" style="min-width: 100px; height: 60px;">
+                    <th scope="row" class="fw-bold bg-light" th:text="${h + ':00'}"></th>
+                    
+                    <td th:each="dia : ${dias}" style="min-width: 110px; height: 70px;">
                         
                         <th:block th:with="vaga=${disponibilidades.?[data.toString() == '__${dia.toString()}__' && hora == __${h}__]}">
                             
                             <div th:if="${not #lists.isEmpty(vaga) && !vaga[0].reservado}">
                                 <form th:action="@{/aluno/agendar-aula/confirmar}" method="post">
                                     <input type="hidden" name="disponibilidadeId" th:value="${vaga[0].id}">
-                                    <button type="submit" class="btn btn-success btn-sm w-100 py-2">
-                                        <i class="bi bi-calendar-plus"></i> Reservar
+                                    <button type="submit" class="btn btn-success btn-sm w-100 py-2 fw-bold"
+                                            th:aria-label="'Reservar aula para ' + ${#temporals.format(dia, 'dd/MM')} + ' às ' + ${h} + ':00'">
+                                        <i class="bi bi-calendar-plus" aria-hidden="true"></i> Reservar
                                     </button>
                                 </form>
                             </div>
 
                             <div th:if="${not #lists.isEmpty(vaga) && vaga[0].reservado}">
-                                <span class="badge bg-secondary w-100 py-2">Ocupado</span>
+                                <span class="badge bg-secondary w-100 py-2" aria-label="Horário ocupado">Ocupado</span>
                             </div>
 
-                            <span th:if="${#lists.isEmpty(vaga)}" class="text-muted small">-</span>
+                            <span th:if="${#lists.isEmpty(vaga)}" class="text-muted small" aria-hidden="true">-</span>
 
                         </th:block>
                     </td>
                 </tr>
             </tbody>
         </table>
-    </div>
+    </main>
+
+    <footer class="mt-4 text-center">
+        <p class="text-muted small">DOJODAN © 2026 - Gestão de Treinos Profissionais</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
