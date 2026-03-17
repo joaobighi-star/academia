@@ -118,15 +118,37 @@ public class ProfessorController {
     @GetMapping("/agenda")
     public String verAgenda(Authentication auth, @RequestParam(required = false) String dataBase, Model model) {
         Professor prof = buscarProfessorLogado(auth);
-        LocalDate dataRef = (dataBase == null) ? LocalDate.now() : LocalDate.parse(dataBase);
+        
+        LocalDate dataRef;
+        
+        // Tratamento para evitar o erro "Text '' could not be parsed"
+        if (dataBase == null || dataBase.isBlank()) {
+            dataRef = LocalDate.now();
+        } else {
+            try {
+                dataRef = LocalDate.parse(dataBase);
+            } catch (Exception e) {
+                dataRef = LocalDate.now();
+            }
+        }
+
         LocalDate segundaFeira = dataRef.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        
         List<LocalDate> diasDaSemana = new ArrayList<>();
-        for (int i = 0; i < 7; i++) { diasDaSemana.add(segundaFeira.plusDays(i)); }
+        for (int i = 0; i < 7; i++) { 
+            diasDaSemana.add(segundaFeira.plusDays(i)); 
+        }
+
         model.addAttribute("professor", prof);
         model.addAttribute("dias", diasDaSemana);
         model.addAttribute("horas", IntStream.rangeClosed(7, 21).boxed().toList());
         model.addAttribute("disponibilidades", disponibilidadeRepository.findByProfessorAndDataBetween(prof, segundaFeira, segundaFeira.plusDays(6)));
+        
+        // Variáveis para os botões de navegação no HTML
         model.addAttribute("dataRef", dataRef);
+        model.addAttribute("proximaSemana", dataRef.plusWeeks(1).toString());
+        model.addAttribute("semanaAnterior", dataRef.minusWeeks(1).toString());
+
         return "professor/agenda";
     }
 
