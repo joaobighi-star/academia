@@ -1,6 +1,7 @@
 package com.academia.model;
 
 import com.academia.enums.Faixa;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -14,6 +15,7 @@ public class Professor {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id")
+    @JsonIgnore // Impede o envio de dados sensíveis de login para o Flutter
     private Usuario usuario;
 
     private String nome;
@@ -26,52 +28,51 @@ public class Professor {
 
     private String especialidade;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Usuario getUsuario() {
-		return usuario;
-	}
+    public Usuario getUsuario() {
+        return usuario;
+    }
 
-	public void setUsuario(Usuario usuario) {
-		this.usuario = usuario;
-	}
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public Faixa getFaixa() {
-		return faixa;
-	}
+    public Faixa getFaixa() {
+        return faixa;
+    }
 
-	public void setFaixa(Faixa faixa) {
-		this.faixa = faixa;
-	}
+    public void setFaixa(Faixa faixa) {
+        this.faixa = faixa;
+    }
 
-	public List<String> getDisponibilidadeAulasParticulares() {
-		return disponibilidadeAulasParticulares;
-	}
+    public List<String> getDisponibilidadeAulasParticulares() {
+        return disponibilidadeAulasParticulares;
+    }
 
-	public void setDisponibilidadeAulasParticulares(List<String> disponibilidadeAulasParticulares) {
-		this.disponibilidadeAulasParticulares = disponibilidadeAulasParticulares;
-	}
+    public void setDisponibilidadeAulasParticulares(List<String> disponibilidadeAulasParticulares) {
+        this.disponibilidadeAulasParticulares = disponibilidadeAulasParticulares;
+    }
 
-	public String getEspecialidade() {
-		return especialidade;
-	}
+    public String getEspecialidade() {
+        return especialidade;
+    }
 
-	public void setEspecialidade(String especialidade) {
-		this.especialidade = especialidade;
-	}
-    
+    public void setEspecialidade(String especialidade) {
+        this.especialidade = especialidade;
+    }
 }

@@ -1,5 +1,6 @@
 package com.academia.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -18,10 +19,14 @@ public class AulaParticular {
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
+    // Ignora campos pesados ou sensíveis do Aluno ao listar a aula
+    @JsonIgnoreProperties({"usuario", "foto", "turma", "aulasAssistidas", "bsn", "iban"})
     private Aluno aluno;
 
     @ManyToOne
     @JoinColumn(name = "professor_id")
+    // Ignora campos desnecessários do Professor ao listar a aula
+    @JsonIgnoreProperties({"usuario", "disponibilidadeAulasParticulares"})
     private Professor professor;
 
     private LocalDateTime dataHora;
@@ -37,76 +42,77 @@ public class AulaParticular {
 
     private boolean presencaConfirmada = false;
 
-	public Long getId() {
-		return id;
-	}
+    // --- Getters e Setters ---
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Disponibilidade getDisponibilidade() {
-		return disponibilidade;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setDisponibilidade(Disponibilidade disponibilidade) {
-		this.disponibilidade = disponibilidade;
-	}
+    public Disponibilidade getDisponibilidade() {
+        return disponibilidade;
+    }
 
-	public Aluno getAluno() {
-		return aluno;
-	}
+    public void setDisponibilidade(Disponibilidade disponibilidade) {
+        this.disponibilidade = disponibilidade;
+    }
 
-	public void setAluno(Aluno aluno) {
-		this.aluno = aluno;
-	}
+    public Aluno getAluno() {
+        return aluno;
+    }
 
-	public Professor getProfessor() {
-		return professor;
-	}
+    public void setAluno(Aluno aluno) {
+        this.aluno = aluno;
+    }
 
-	public void setProfessor(Professor professor) {
-		this.professor = professor;
-	}
+    public Professor getProfessor() {
+        return professor;
+    }
 
-	public LocalDateTime getDataHora() {
-		return dataHora;
-	}
+    public void setProfessor(Professor professor) {
+        this.professor = professor;
+    }
 
-	public void setDataHora(LocalDateTime dataHora) {
-		this.dataHora = dataHora;
-	}
+    public LocalDateTime getDataHora() {
+        return dataHora;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public void setDataHora(LocalDateTime dataHora) {
+        this.dataHora = dataHora;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public String getObservacoes() {
-		return observacoes;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public void setObservacoes(String observacoes) {
-		this.observacoes = observacoes;
-	}
+    public String getObservacoes() {
+        return observacoes;
+    }
 
-	public String getMensagemProfessor() {
-		return mensagemProfessor;
-	}
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
+    }
 
-	public void setMensagemProfessor(String mensagemProfessor) {
-		this.mensagemProfessor = mensagemProfessor;
-	}
+    public String getMensagemProfessor() {
+        return mensagemProfessor;
+    }
 
-	public boolean isPresencaConfirmada() {
-		return presencaConfirmada;
-	}
+    public void setMensagemProfessor(String mensagemProfessor) {
+        this.mensagemProfessor = mensagemProfessor;
+    }
 
-	public void setPresencaConfirmada(boolean presencaConfirmada) {
-		this.presencaConfirmada = presencaConfirmada;
-	}
-    
+    public boolean isPresencaConfirmada() {
+        return presencaConfirmada;
+    }
+
+    public void setPresencaConfirmada(boolean presencaConfirmada) {
+        this.presencaConfirmada = presencaConfirmada;
+    }
 }

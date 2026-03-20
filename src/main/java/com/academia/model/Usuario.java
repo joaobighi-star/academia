@@ -24,44 +24,21 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     private Set<Perfil> perfis;
 
-	public Long getId() {
-		return id;
-	}
+    // Métodos para o Flutter identificar o tipo de usuário
+    public String getRolePrincipal() {
+        if (perfis == null || perfis.isEmpty()) return "ROLE_USER";
+        return perfis.iterator().next().name(); // Retorna ROLE_ALUNO ou ROLE_PROFESSOR
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
-
-	public boolean isSenhaAlteradaPeloAdmin() {
-		return senhaAlteradaPeloAdmin;
-	}
-
-	public void setSenhaAlteradaPeloAdmin(boolean senhaAlteradaPeloAdmin) {
-		this.senhaAlteradaPeloAdmin = senhaAlteradaPeloAdmin;
-	}
-
-	public Set<Perfil> getPerfis() {
-		return perfis;
-	}
-
-	public void setPerfis(Set<Perfil> perfis) {
-		this.perfis = perfis;
-	}
-    
+    // Getters e Setters (Mantidos conforme seu original)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+    public boolean isSenhaAlteradaPeloAdmin() { return senhaAlteradaPeloAdmin; }
+    public void setSenhaAlteradaPeloAdmin(boolean senhaAlteradaPeloAdmin) { this.senhaAlteradaPeloAdmin = senhaAlteradaPeloAdmin; }
+    public Set<Perfil> getPerfis() { return perfis; }
+    public void setPerfis(Set<Perfil> perfis) { this.perfis = perfis; }
 }

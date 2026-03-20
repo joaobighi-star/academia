@@ -2,6 +2,7 @@ package com.academia.model;
 
 import com.academia.enums.Faixa;
 import com.academia.enums.StatusMensalidade;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -21,6 +22,7 @@ public class Aluno {
     @JoinColumn(name = "usuario_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore // Impede loop infinito com o Usuário no JSON
     private Usuario usuario;
 
     private String nome;
@@ -35,6 +37,7 @@ public class Aluno {
     
     @Lob
     @Column(columnDefinition = "MEDIUMBLOB")
+    @JsonIgnore // Remove o peso dos bytes da foto da listagem da API
     private byte[] foto;
 
     @Enumerated(EnumType.STRING)
@@ -54,10 +57,10 @@ public class Aluno {
     @JoinColumn(name = "turma_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore // Evita carregar toda a estrutura de turma na listagem de alunos
     private Turma turma;
 
     // --- LÓGICA DE PROGRESSÃO DINÂMICA ---
-
     public int getIdade() {
         if (this.dataNascimento == null) return 0;
         return Period.between(this.dataNascimento, LocalDate.now()).getYears();
@@ -90,7 +93,7 @@ public class Aluno {
         return Math.min(percentual, 100.0);
     }
 
-    // --- GETTERS E SETTERS (O Lombok @Data já gera, mas mantidos para compatibilidade) ---
+    // Getters e Setters mantidos
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Usuario getUsuario() { return usuario; }

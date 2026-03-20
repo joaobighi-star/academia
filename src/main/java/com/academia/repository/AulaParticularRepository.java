@@ -10,9 +10,15 @@ import java.util.List;
 @Repository
 public interface AulaParticularRepository extends JpaRepository<AulaParticular, Long> {
 
-    // Busca para o Aluno
+    List<AulaParticular> findByAlunoId(Long alunoId);
+
+    List<AulaParticular> findByAlunoIdOrderByDataHoraAsc(Long alunoId);
+
+    List<AulaParticular> findByProfessorIdAndStatus(Long professorId, String status);
+
+    List<AulaParticular> findByProfessorIdOrderByDataHoraAsc(Long professorId);
+
     List<AulaParticular> findByAlunoOrderByDataHoraAsc(Aluno aluno);
     
-    // Busca para o Professor (Necessário para o ProfessorController)
     List<AulaParticular> findByProfessorOrderByDataHoraAsc(Professor professor);
 }
