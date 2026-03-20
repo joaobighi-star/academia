@@ -16,4 +16,6 @@ public interface DisponibilidadeRepository extends JpaRepository<Disponibilidade
     Optional<Disponibilidade> findByProfessorAndDataAndHora(Professor professor, LocalDate data, Integer hora);
 
     boolean existsByProfessorAndDataAndHora(Professor professor, LocalDate data, Integer hora);
+
+    List<Disponibilidade> findByProfessorIdAndDataBetweenOrderByDataAscHoraAsc(Long professorId, LocalDate inicio, LocalDate fim);
 }
